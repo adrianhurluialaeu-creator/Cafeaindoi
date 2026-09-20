@@ -22,4 +22,4 @@ export default function Page(){return <main className="story"><h1>Politica de co
 <p>Sunt utilizate conexiuni HTTPS/TLS și servicii tehnice care oferă măsuri de securitate pentru transmiterea datelor. Niciun sistem online nu poate garanta însă securitate absolută.</p>
 <h2>11. Actualizări</h2>
 <p>Politica poate fi actualizată dacă se modifică formularul, furnizorii sau modul de prelucrare. Data ultimei actualizări este afișată la începutul paginii.</p>
-</main>
+</main>}
