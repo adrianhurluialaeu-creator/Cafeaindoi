@@ -1,4 +1,4 @@
-export default function Page(){return <main className="story"><h1>Cookies</h1>
+export default function Page(){return <main className="story"><a href="/" className="back-link">← Înapoi la Cafea în Doi</a><h1>Cookies</h1>
 <p><strong>Ultima actualizare: 20 septembrie 2026</strong></p>
 <h2>1. Ce sunt cookie-urile</h2>
 <p>Cookie-urile și tehnologiile similare sunt mici informații pe care un site le poate salva sau citi pe dispozitiv pentru funcționare, preferințe, securitate, analiză sau publicitate.</p>
