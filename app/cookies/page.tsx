@@ -1,4 +1,5 @@
-export default function Page(){return <main className="story"><a href="/" className="back-link">← Înapoi la Cafea în Doi</a><h1>Cookies</h1>
+import Image from "next/image"; import Link from "next/link";
+export default function Page(){return <><header><div className="wrap"><nav><Link className="brand logo-link" href="/" aria-label="Cafea în Doi — pagina principală"><Image className="site-logo" src="/images/ChatGPT Image 20 sept. 2026, 20_47_04.png" width={1536} height={512} alt="Cafea în Doi — Mai mult decât o cafea"/></Link><Link href="/">Acasă</Link></nav></div></header><main className="story"><h1>Cookies</h1>
 <p><strong>Ultima actualizare: 20 septembrie 2026</strong></p>
 <h2>1. Ce sunt cookie-urile</h2>
 <p>Cookie-urile și tehnologiile similare sunt mici informații pe care un site le poate salva sau citi pe dispozitiv pentru funcționare, preferințe, securitate, analiză sau publicitate.</p>
@@ -14,4 +15,4 @@ export default function Page(){return <main className="story"><a href="/" classN
 <p>Poți șterge sau bloca cookie-urile din setările browserului. Blocarea tehnologiilor strict necesare poate afecta funcționarea unor caracteristici ale site-ului.</p>
 <h2>7. Actualizări</h2>
 <p>Această pagină va fi actualizată dacă se schimbă tehnologiile utilizate de Cafea în Doi.</p>
-</main>}
+</main></>}
