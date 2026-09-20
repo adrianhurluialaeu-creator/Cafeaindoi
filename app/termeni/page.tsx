@@ -1,4 +1,5 @@
-export default function Page(){return <main className="story"><a href="/" className="back-link">← Înapoi la Cafea în Doi</a><h1>Termeni și condiții</h1>
+import Image from "next/image"; import Link from "next/link";
+export default function Page(){return <><header><div className="wrap"><nav><Link className="brand logo-link" href="/" aria-label="Cafea în Doi — pagina principală"><Image className="site-logo" src="/images/ChatGPT Image 20 sept. 2026, 20_47_04.png" width={1536} height={512} alt="Cafea în Doi — Mai mult decât o cafea"/></Link><Link href="/">Acasă</Link></nav></div></header><main className="story"><h1>Termeni și condiții</h1>
 <p><strong>Ultima actualizare: 20 septembrie 2026</strong></p>
 <h2>1. Despre Cafea în Doi</h2>
 <p>Cafea în Doi este o pagină personală, necomercială, administrată de Adrian. Scopul ei este de a permite unei persoane interesate să trimită o invitație personală și câteva informații despre sine, pentru ca Adrian să poată decide dacă dorește continuarea conversației.</p>
@@ -20,4 +21,4 @@ export default function Page(){return <main className="story"><a href="/" classN
 <p>Acești termeni pot fi actualizați atunci când se schimbă funcționalitatea site-ului sau cerințele aplicabile. Data ultimei actualizări este afișată la începutul paginii.</p>
 <h2>10. Contact</h2>
 <p>Pentru întrebări privind site-ul sau acești termeni, folosește datele indicate în pagina Contact.</p>
-</main>}
+</main></>}
