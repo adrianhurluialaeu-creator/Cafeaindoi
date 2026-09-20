@@ -23,4 +23,4 @@ export default function Page(){return <><header><div className="wrap"><nav><Link
 <p>Sunt utilizate conexiuni HTTPS/TLS și servicii tehnice care oferă măsuri de securitate pentru transmiterea datelor. Niciun sistem online nu poate garanta însă securitate absolută.</p>
 <h2>11. Actualizări</h2>
 <p>Politica poate fi actualizată dacă se modifică formularul, furnizorii sau modul de prelucrare. Data ultimei actualizări este afișată la începutul paginii.</p>
-</main><footer><div className="wrap footer"><span>© 2026 Cafea în Doi</span><div className="links"><Link href="/termeni">Termeni</Link><Link href="/confidentialitate">Confidențialitate</Link><Link href="/cookies">Cookies</Link><Link href="/contact">Contact</Link></div></div></footer></>}
+</main><footer><div className="wrap footer"><span>© 2026 Cafea în Doi</span><div className="links"><Link href="/termeni">Termeni</Link><Link href="/confidentialitate">Confidențialitate</Link><Link href="/cookies">Cookies</Link><Link href="/contact">Contact</Link><Link href="/admin/profil-compatibilitate">Privat</Link></div></div></footer></>}
