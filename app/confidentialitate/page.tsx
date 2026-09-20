@@ -1,0 +1,1 @@
+export default function Page(){return <main className="story"><h1>Confidențialitate</h1><p>Formularul va colecta numai datele necesare pentru gestionarea invitației și contactul ulterior, conform politicii finale GDPR.</p></main>}
