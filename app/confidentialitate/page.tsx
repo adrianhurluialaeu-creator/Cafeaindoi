@@ -1,4 +1,4 @@
-export default function Page(){return <main className="story"><h1>Politica de confidențialitate</h1>
+export default function Page(){return <main className="story"><a href="/" className="back-link">← Înapoi la Cafea în Doi</a><h1>Politica de confidențialitate</h1>
 <p><strong>Ultima actualizare: 20 septembrie 2026</strong></p>
 <h2>1. Cine administrează datele</h2>
 <p>Cafea în Doi este o pagină personală administrată de Adrian. Pentru solicitări privind datele tale personale, folosește datele de contact publicate în pagina Contact.</p>
