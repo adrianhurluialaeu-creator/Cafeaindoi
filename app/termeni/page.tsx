@@ -21,4 +21,4 @@ export default function Page(){return <><header><div className="wrap"><nav><Link
 <p>Acești termeni pot fi actualizați atunci când se schimbă funcționalitatea site-ului sau cerințele aplicabile. Data ultimei actualizări este afișată la începutul paginii.</p>
 <h2>10. Contact</h2>
 <p>Pentru întrebări privind site-ul sau acești termeni, folosește datele indicate în pagina Contact.</p>
-</main><footer><div className="wrap footer"><span>© 2026 Cafea în Doi</span><div className="links"><Link href="/termeni">Termeni</Link><Link href="/confidentialitate">Confidențialitate</Link><Link href="/cookies">Cookies</Link><Link href="/contact">Contact</Link></div></div></footer></>}
+</main><footer><div className="wrap footer"><span>© 2026 Cafea în Doi</span><div className="links"><Link href="/termeni">Termeni</Link><Link href="/confidentialitate">Confidențialitate</Link><Link href="/cookies">Cookies</Link><Link href="/contact">Contact</Link><Link href="/admin/profil-compatibilitate">Privat</Link></div></div></footer></>}
