@@ -1,0 +1,1 @@
+export default function Page(){return <main className="story"><h1>Cookies</h1><p>Cookies opționale pentru analiză sau publicitate vor fi activate numai conform alegerilor de consimțământ.</p></main>}
