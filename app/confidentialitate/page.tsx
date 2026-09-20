@@ -3,7 +3,7 @@ export default function Page(){return <main className="story"><h1>Politica de co
 <h2>1. Cine administrează datele</h2>
 <p>Cafea în Doi este o pagină personală administrată de Adrian. Pentru solicitări privind datele tale personale, folosește datele de contact publicate în pagina Contact.</p>
 <h2>2. Ce date sunt colectate</h2>
-<p>Prin formular pot fi colectate: prenumele, vârsta, localitatea, țara, numărul WhatsApp, textul introdus în câmpul „Spune-mi puțin despre tine”, precum și confirmările privind vârsta minimă și citirea politicii de confidențialitate. Furnizorii tehnici pot prelucra și date tehnice, precum adresa IP, data și ora solicitării, informații despre browser/dispozitiv și jurnale necesare securității și funcționării serviciului.</p>
+<p>Prin formular pot fi colectate: prenumele, vârsta, localitatea, țara, numărul WhatsApp, textul introdus în câmpul „Spune-mi puțin despre tine”, precum și confirmările privind vârsta minimă și citirea politicii de confidențialitate. Furnizorii tehnici pot prelucra și date tehnice, precum adresa IP, data și ora solicitării, informații despre browser și dispozitiv și jurnale necesare securității și funcționării serviciului.</p>
 <h2>3. Scopul și temeiul prelucrării</h2>
 <p>Datele introduse în formular sunt folosite pentru primirea, evaluarea și, dacă există interes reciproc, continuarea invitației. Pentru datele furnizate voluntar prin formular, temeiul principal este consimțământul tău. Datele tehnice strict necesare pot fi prelucrate pentru funcționarea, securitatea și prevenirea abuzului, pe baza interesului legitim, în măsura permisă de lege.</p>
 <h2>4. Cum circulă datele</h2>
