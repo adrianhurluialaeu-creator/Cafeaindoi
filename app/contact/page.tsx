@@ -1,0 +1,1 @@
+export default function Contact(){return <main className="story"><h1>Contact</h1><p>Email propus: salut@cafeaindoi.eu. Numărul personal WhatsApp nu este public.</p></main>}
