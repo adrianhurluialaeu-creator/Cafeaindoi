@@ -14,4 +14,4 @@ export default function Page(){return <main className="story"><h1>Cookies</h1>
 <p>Poți șterge sau bloca cookie-urile din setările browserului. Blocarea tehnologiilor strict necesare poate afecta funcționarea unor caracteristici ale site-ului.</p>
 <h2>7. Actualizări</h2>
 <p>Această pagină va fi actualizată dacă se schimbă tehnologiile utilizate de Cafea în Doi.</p>
-</main>
+</main>}
