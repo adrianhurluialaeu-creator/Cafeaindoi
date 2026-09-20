@@ -1,4 +1,4 @@
-export default function Page(){return <main className="story"><h1>Termeni și condiții</h1>
+export default function Page(){return <main className="story"><a href="/" className="back-link">← Înapoi la Cafea în Doi</a><h1>Termeni și condiții</h1>
 <p><strong>Ultima actualizare: 20 septembrie 2026</strong></p>
 <h2>1. Despre Cafea în Doi</h2>
 <p>Cafea în Doi este o pagină personală, necomercială, administrată de Adrian. Scopul ei este de a permite unei persoane interesate să trimită o invitație personală și câteva informații despre sine, pentru ca Adrian să poată decide dacă dorește continuarea conversației.</p>
