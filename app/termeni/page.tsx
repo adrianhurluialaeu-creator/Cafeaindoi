@@ -1,0 +1,1 @@
+export default function Page(){return <main className="story"><h1>Termeni și condiții</h1><p>Cafea în Doi este pagina personală a lui Adrian și este destinată persoanelor de minimum 18 ani. Trimiterea unei invitații nu creează obligații pentru niciuna dintre persoane.</p></main>}
