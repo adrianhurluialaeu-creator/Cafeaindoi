@@ -6,10 +6,17 @@ const MAX_PHOTO=5*1024*1024;
 const PHOTO_TYPES=["image/jpeg","image/png","image/webp"];
 const CONVERSION_DESTINATION="AW-18467510680/66mnCKWvgYEdEJiz_-VE";
 function reportConversion(){
- const event={send_to:CONVERSION_DESTINATION,value:1.0,currency:"EUR"};
- if(typeof window.gtag==="function"){window.gtag("event","conversion",event);return}
+ // Match Google's event snippet exactly. The global Google tag is loaded by GoogleAdsConsent.
+ // Push through gtag (arguments object), not a hand-built dataLayer array.
  window.dataLayer=window.dataLayer||[];
- window.dataLayer.push(["event","conversion",event]);
+ if(typeof window.gtag!=="function"){
+  window.gtag=function(){window.dataLayer.push(arguments as any)};
+ }
+ window.gtag("event","conversion",{
+  send_to:CONVERSION_DESTINATION,
+  value:1.0,
+  currency:"EUR"
+ });
 }
 export default function InvitationForm(){
  const [state,setState]=useState<"idle"|"sending"|"sent"|"error">("idle"),[error,setError]=useState("");
