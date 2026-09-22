@@ -13,6 +13,7 @@ const navGroups=[
  ]},
  {label:"Conținut",items:[
   {href:"/admin/articole",label:"Articole",icon:"✎"},
+  {href:"/admin/declaratii",label:"Declarații",icon:"💌"},
   {href:"/admin/compatibilitate",label:"Compatibilitate",icon:"♡"},
   {href:"/admin/contact",label:"Contact",icon:"✉"}
  ]},
