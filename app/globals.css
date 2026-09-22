@@ -56,3 +56,29 @@
 .article-opinion .btn{margin-top:8px}
 .opinion-hp{position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden}
 @media(max-width:600px){.article-opinion{padding:20px}.article-opinion h2{font-size:30px}}
+
+.reader-opinions{margin:36px 0 46px}
+.reader-opinions h2{margin-bottom:18px}
+.reader-opinions-empty{color:#74685f;background:var(--paper);border:1px dashed var(--line);border-radius:14px;padding:18px}
+.reader-opinion{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:18px 20px;margin:12px 0}
+.reader-opinion>div{display:flex;justify-content:space-between;gap:14px;align-items:center}
+.reader-opinion strong{color:var(--espresso)}
+.reader-opinion time{font-size:12px;color:#8b7770}
+.reader-opinion p{margin:10px 0 0;white-space:pre-wrap}
+.moderation{margin-top:28px}
+.moderation-summary{display:flex;gap:12px;align-items:center;flex-wrap:wrap;background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:14px 16px}
+.moderation-summary span{padding:7px 11px;background:#f5ebe1;border-radius:99px}
+.moderation-summary strong{color:var(--espresso)}
+.moderation section{margin-top:36px}
+.moderation-card{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:18px;margin:12px 0}
+.moderation-card p{white-space:pre-wrap}
+.moderation-head{display:flex;justify-content:space-between;align-items:flex-start;gap:18px}
+.moderation-head>div{display:grid}
+.moderation-head small{color:#8b7770;margin-top:2px}
+.moderation-head a{font-size:13px;font-weight:700;color:var(--coffee);text-align:right}
+.moderation-actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+@media(max-width:600px){
+ .reader-opinion>div,.moderation-head{align-items:flex-start;flex-direction:column}
+ .moderation-head a{text-align:left}
+ .moderation-actions .btn{width:100%}
+}
