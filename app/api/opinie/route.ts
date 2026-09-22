@@ -11,7 +11,7 @@ const safe=(s:string)=>s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;
 
 export async function GET(req:NextRequest){
  const article=req.nextUrl.searchParams.get("article")||"";
- if(!/^\/blog\/[a-z0-9-]+$/.test(article))return NextResponse.json({opinions:[]});
+ if(!/^\/(blog|declaratii)\/[a-z0-9-]+$/.test(article))return NextResponse.json({opinions:[]});
  try{
   const opinions=await listApprovedForArticle(article);
   return NextResponse.json({opinions:opinions.map(({id,prenume,opinia,createdAt,approvedAt})=>({id,prenume,opinia,createdAt,approvedAt}))},{headers:{"Cache-Control":"no-store"}});
@@ -40,7 +40,7 @@ export async function POST(req:NextRequest){
   const article=String(d.get("article")||"").trim().slice(0,220);
   const articleTitle=String(d.get("articleTitle")||"").trim().slice(0,220);
   const publishOk=d.get("publishOk")==="on";
-  if(!prenume||opinia.length<3||!publishOk||!/^\/blog\/[a-z0-9-]+$/.test(article)){
+  if(!prenume||opinia.length<3||!publishOk||!/^\/(blog|declaratii)\/[a-z0-9-]+$/.test(article)){
    return NextResponse.json({ok:false,error:"Verifică toate câmpurile obligatorii."},{status:400});
   }
 
