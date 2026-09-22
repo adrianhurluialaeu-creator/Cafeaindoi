@@ -82,3 +82,5 @@
  .moderation-head a{text-align:left}
  .moderation-actions .btn{width:100%}
 }
+
+/* Redeploy after connecting private Vercel Blob storage. */
