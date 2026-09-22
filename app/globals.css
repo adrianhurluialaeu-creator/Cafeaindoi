@@ -231,3 +231,76 @@ button.admin-stat{cursor:pointer}.admin-stat.active{border-color:#9d765d;box-sha
  .admin-v2-kpis{grid-template-columns:1fr 1fr}.admin-v2-kpis a{min-height:96px}.admin-v2-kpis strong{font-size:18px}
  .admin-v2-module-card{grid-template-columns:40px 1fr auto;padding:13px}.admin-v2-module-icon{width:38px;height:38px}
 }
+
+/* Declarations */
+.declarations-page{width:min(1120px,92vw);margin:0 auto;padding:58px 0 70px}
+.declarations-hero{max-width:760px;margin-bottom:32px}
+.declarations-hero h1{font-size:clamp(46px,6vw,72px);margin:8px 0 14px}
+.declarations-hero p{font-family:Georgia,serif;font-size:20px;color:#5d5049;line-height:1.65;margin:0}
+.declarations-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.declaration-card-public{background:var(--paper);border:1px solid var(--line);border-radius:20px;overflow:hidden;text-decoration:none;box-shadow:0 14px 34px #4b2d1f0b;transition:.18s ease}
+.declaration-card-public:hover{transform:translateY(-2px);box-shadow:0 18px 42px #4b2d1f12}
+.declaration-card-public>img{width:100%;height:230px;object-fit:cover;display:block;background:#efe5dc}
+.declaration-card-body{padding:22px}
+.declaration-category{display:inline-block;font-size:10px;text-transform:uppercase;letter-spacing:1.2px;font-weight:800;color:var(--coffee);background:#f5ebe1;border-radius:99px;padding:6px 9px}
+.declaration-card-body h2{font-size:30px;margin:12px 0 10px}
+.declaration-card-body p{color:#665a52;margin:0;line-height:1.65}
+.declaration-card-foot{display:flex;justify-content:space-between;gap:16px;border-top:1px solid var(--line);margin-top:18px;padding-top:12px;font-size:11px;color:#8b7b72;font-weight:700}
+.declarations-empty{background:var(--paper);border:1px dashed var(--line);border-radius:18px;padding:42px;text-align:center}
+.declaration-detail{width:min(860px,90vw);margin:52px auto 70px}
+.declaration-letter{background:var(--paper);border:1px solid var(--line);border-radius:24px;padding:clamp(26px,5vw,54px);box-shadow:0 22px 56px #4b2d1f0e}
+.declaration-back{display:inline-block;margin-bottom:24px;color:#806453;font-size:12px;font-weight:800;text-decoration:none}
+.declaration-letter h1{font-size:clamp(42px,6vw,68px);margin:13px 0 9px}
+.declaration-date{color:#8b7b72;font-size:12px;margin-bottom:28px}
+.declaration-hero-image{width:100%;max-height:520px;object-fit:cover;border-radius:18px;margin:8px 0 28px}
+.declaration-text{font-family:Georgia,serif;font-size:20px;line-height:1.85;color:#3b332f}
+.declaration-text p{margin:0 0 1.4em}
+.declaration-signature{font-family:Georgia,serif;font-style:italic;font-size:20px;text-align:right;color:var(--coffee);margin-top:24px}
+.declaration-actions-bar{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:18px 0 34px}
+.declaration-actions-bar button,.declaration-actions-bar a{border:1px solid #dacdc4;background:#fff;border-radius:99px;padding:9px 13px;font:inherit;font-size:12px;font-weight:800;color:#5c4b42;text-decoration:none;cursor:pointer}
+.declaration-actions-bar .declaration-like{background:#fff5f5;border-color:#ead1d1;color:#7e3e3e}
+.declaration-actions-bar .declaration-like.liked{background:#7e3e3e;color:#fff;border-color:#7e3e3e}
+.declaration-opinion{margin-top:28px}
+.declaration-home{padding:10px 0 58px}
+.declaration-home-head{display:flex;justify-content:space-between;align-items:end;gap:18px;margin-bottom:15px}
+.declaration-home-head h2{margin:5px 0 0}.declaration-home-head>a{font-size:12px;font-weight:800;color:var(--coffee);text-decoration:none}
+.declaration-home-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.declaration-home-card{background:var(--paper);border:1px solid var(--line);border-radius:16px;padding:18px;text-decoration:none}
+.declaration-home-card span{font-size:9px;text-transform:uppercase;letter-spacing:1px;font-weight:800;color:var(--coffee)}
+.declaration-home-card h3{font-family:Georgia,serif;color:var(--espresso);font-size:22px;margin:8px 0}
+.declaration-home-card p{margin:0;color:#6d6058;font-size:13px;line-height:1.55}
+
+/* Declaration admin */
+.declaration-admin{display:grid;gap:16px;max-width:1120px}
+.declaration-editor h2{font-size:25px;margin:6px 0 2px}
+.declaration-editor-head{display:flex;justify-content:space-between;gap:16px;align-items:flex-start}
+.declaration-editor select{width:100%;padding:11px;border:1px solid #d9c9ba;border-radius:9px;background:#fff;font:inherit}
+.declaration-textarea{min-height:250px;resize:vertical}
+.declaration-editor-actions{display:flex;justify-content:flex-end;margin-top:14px}
+.declaration-list-panel{overflow:hidden}
+.declaration-admin-list{padding:4px 22px 20px}
+.declaration-admin-item{display:grid;grid-template-columns:minmax(0,1fr) 120px;gap:18px;padding:20px 0;border-bottom:1px solid #eee6df}
+.declaration-admin-item:last-child{border-bottom:0}
+.declaration-admin-meta{display:flex;gap:10px;align-items:center}
+.declaration-admin-meta span{font-size:9px;text-transform:uppercase;letter-spacing:1px;font-weight:800;color:var(--coffee);background:#f5ebe1;border-radius:99px;padding:5px 8px}
+.declaration-admin-meta small{font-size:10px;color:#94847a}
+.declaration-admin-item h3{font-family:Georgia,serif;font-size:23px;color:var(--espresso);margin:9px 0 6px}
+.declaration-admin-item p{margin:0;color:#665a52;font-size:13px;line-height:1.55}
+.declaration-admin-actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:14px}
+.declaration-admin-actions a{display:inline-flex;align-items:center;text-decoration:none}
+.declaration-admin-thumb{width:120px;height:100px;object-fit:cover;border-radius:12px;background:#eee}
+
+@media(max-width:760px){
+ .declarations-page{padding:34px 0 48px}
+ .declarations-grid,.declaration-home-grid{grid-template-columns:1fr}
+ .declaration-card-public>img{height:210px}
+ .declaration-detail{margin-top:28px}
+ .declaration-letter{border-radius:18px;padding:24px 20px}
+ .declaration-text{font-size:18px;line-height:1.75}
+ .declaration-actions-bar{gap:7px}.declaration-actions-bar button,.declaration-actions-bar a{flex:1 1 auto;text-align:center}
+ .declaration-home{padding-bottom:42px}
+ .declaration-admin-item{grid-template-columns:1fr}
+ .declaration-admin-thumb{width:100%;height:180px;grid-row:1}
+ .declaration-editor .row{grid-template-columns:1fr}
+ .declaration-editor-actions .btn{width:100%}
+}
