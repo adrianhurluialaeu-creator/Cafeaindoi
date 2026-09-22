@@ -1,5 +1,6 @@
 import "./globals.css";
 import type {Metadata} from "next";
+import GoogleAdsConsent from "../components/GoogleAdsConsent";
 export const metadata:Metadata={
  metadataBase:new URL("https://www.cafeaindoi.eu"),
  title:{default:"Cafea în Doi",template:"%s | Cafea în Doi"},
@@ -9,4 +10,4 @@ export const metadata:Metadata={
  twitter:{card:"summary_large_image",title:"Cafea în Doi",description:"Prima cafea o bem online.",images:["/images/01_cafea_in_doi.png"]},
  robots:{index:true,follow:true}
 };
-export default function RootLayout({children}:{children:React.ReactNode}){return <html lang="ro"><body>{children}</body></html>}
+export default function RootLayout({children}:{children:React.ReactNode}){return <html lang="ro"><body>{children}<GoogleAdsConsent/></body></html>}
