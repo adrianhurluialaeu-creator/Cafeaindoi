@@ -1,0 +1,3 @@
+import AdminShell from "../../../components/AdminShell";
+export const metadata={title:"Articole · Admin",robots:{index:false,follow:false}};
+export default function Page(){return <AdminShell title="Articole" subtitle="Administrează conținutul din „Gândurile mele”."><section className="admin-v2-placeholder"><div className="admin-v2-placeholder-icon">✎</div><h2>Articole</h2><p>Aici putem adăuga creare, editare, categorii, publicare și numărul de opinii pentru fiecare articol.</p><span>Modul pregătit pentru extindere</span></section></AdminShell>}
