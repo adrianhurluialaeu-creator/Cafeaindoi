@@ -4,7 +4,7 @@ import {FormEvent,useState} from "react";
 declare global{interface Window{dataLayer:any[];gtag?:(...args:any[])=>void}}
 const MAX_PHOTO=5*1024*1024;
 const PHOTO_TYPES=["image/jpeg","image/png","image/webp"];
-const CONVERSION_DESTINATION="AW-18467510680/66mnCKWvgYEdEjiz_-VE";
+const CONVERSION_DESTINATION="AW-18467510680/66mnCKWvgYEdEJiz_-VE";
 function reportConversion(){
  const event={send_to:CONVERSION_DESTINATION,value:1.0,currency:"EUR"};
  if(typeof window.gtag==="function"){window.gtag("event","conversion",event);return}
