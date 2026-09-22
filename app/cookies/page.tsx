@@ -17,4 +17,4 @@ export default function Page(){return <><header><div className="wrap"><nav><Link
 <p>Poți șterge sau bloca cookie-urile din setările browserului. Blocarea tehnologiilor strict necesare poate afecta funcționarea unor caracteristici ale site-ului.</p>
 <h2>7. Actualizări</h2>
 <p>Această pagină va fi actualizată dacă se schimbă tehnologiile utilizate de Cafea în Doi.</p>
-</main><footer><div className="wrap footer"><span>© 2026 Cafea în Doi</span><div className="links"><Link href="/termeni">Termeni</Link><Link href="/confidentialitate">Confidențialitate</Link><Link href="/cookies">Cookies</Link><Link href="/contact">Contact</Link><Link href="/admin/profil-compatibilitate">Privat</Link></div></div></footer></>}
+</main><footer><div className="wrap footer"><span>© 2026 Cafea în Doi</span><div className="links"><Link href="/termeni">Termeni</Link><Link href="/confidentialitate">Confidențialitate</Link><Link href="/cookies">Cookies</Link><Link href="/contact">Contact</Link><Link href="/admin">Privat</Link></div></div></footer></>}
