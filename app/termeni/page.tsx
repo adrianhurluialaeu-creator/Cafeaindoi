@@ -1,5 +1,6 @@
 import MobileNav from "../../components/MobileNav";
 import Image from "next/image"; import Link from "next/link";
+export const metadata={alternates:{canonical:"/termeni"}};
 export default function Page(){return <><header><div className="wrap"><nav><Link className="brand logo-link" href="/" aria-label="Cafea în Doi — pagina principală"><Image className="site-logo" src="/images/ChatGPT Image 20 sept. 2026, 20_47_04.png" width={1536} height={512} alt="Cafea în Doi — Mai mult decât o cafea"/></Link><div className="links"><Link href="/">Acasă</Link><Link href="/povestea-mea">Povestea mea</Link><Link href="/intre-noi-doi">Între Noi Doi</Link><Link href="/blog">Gândurile mele</Link><Link href="/#invitatie">Bem o cafea?</Link><Link href="/contact">Contact</Link></div><MobileNav/></nav></div></header><main className="story"><h1>Termeni și condiții</h1>
 <p><strong>Ultima actualizare: 20 septembrie 2026</strong></p>
 <h2>1. Despre Cafea în Doi</h2>
