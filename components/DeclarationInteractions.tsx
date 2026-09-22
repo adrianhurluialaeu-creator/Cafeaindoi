@@ -47,7 +47,7 @@ export default function DeclarationInteractions({slug,title,initialLikes}:{slug:
   }catch(err){setError(err instanceof Error?err.message:"Opinia nu a putut fi trimisă.");setState("error")}
  }
 
- const absolute=typeof window!=="undefined"?window.location.href:"";
+ const absolute="https://www.cafeaindoi.eu/declaratii/"+slug;
  return <>
   <section className="declaration-actions-bar">
    <button className={"declaration-like "+(liked?"liked":"")} onClick={toggleLike}>{liked?"♥":"♡"} <strong>{likes}</strong> <span>{liked?"Îți place":"Îmi place"}</span></button>
