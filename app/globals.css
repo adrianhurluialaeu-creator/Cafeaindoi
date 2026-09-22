@@ -47,3 +47,12 @@
 }
 
 .consent-banner{position:fixed;z-index:9999;left:16px;right:16px;bottom:16px;max-width:760px;margin:auto;padding:18px;background:var(--paper);border:1px solid var(--line);border-radius:16px;box-shadow:0 18px 60px #2b1b1640}.consent-banner p{margin:0 0 12px}.consent-banner>div{display:flex;align-items:center;gap:10px;flex-wrap:wrap}.consent-banner .btn{border:0;cursor:pointer}.consent-banner .secondary{background:#eee;color:var(--espresso)}.consent-banner a{font-weight:700}
+
+.article-opinion-slot{margin:42px 0}
+.article-opinion{background:var(--paper);border:1px solid var(--line);border-radius:20px;padding:26px;box-shadow:0 12px 36px #4b2d1f0d}
+.article-opinion h2{margin:6px 0 8px}
+.article-opinion>p{margin-top:0;color:#665a52}
+.article-opinion textarea{min-height:140px;resize:vertical}
+.article-opinion .btn{margin-top:8px}
+.opinion-hp{position:absolute;left:-10000px;width:1px;height:1px;overflow:hidden}
+@media(max-width:600px){.article-opinion{padding:20px}.article-opinion h2{font-size:30px}}
