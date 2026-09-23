@@ -9,7 +9,8 @@ const navGroups=[
  {label:"Principal",items:[
   {href:"/admin",label:"Overview",icon:"⌂"},
   {href:"/admin/opinii",label:"Opinii",icon:"💬"},
-  {href:"/admin/invitatii",label:"Invitații",icon:"☕"}
+  {href:"/admin/invitatii",label:"Invitații",icon:"☕"},
+  {href:"/admin/conversatii",label:"Conversații",icon:"♡"}
  ]},
  {label:"Conținut",items:[
   {href:"/admin/articole",label:"Articole",icon:"✎"},
