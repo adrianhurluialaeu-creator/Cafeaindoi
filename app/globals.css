@@ -298,8 +298,8 @@ button.admin-stat{cursor:pointer}.admin-stat.active{border-color:#9d765d;box-sha
  .declaration-card-public>img{height:210px}
  .declaration-detail{margin-top:28px}
  .declaration-letter{border-radius:18px;padding:24px 20px}
- .declaration-letter::before{background:linear-gradient(180deg,rgba(255,253,249,.66) 0%,rgba(255,253,249,.8) 52%,rgba(255,253,249,.96) 100%)}
- .declaration-page-shadow{width:128%;top:135px;left:50%;transform:translateX(-48%);opacity:.4}
+ .declaration-letter::before{background:linear-gradient(180deg,rgba(255,253,249,.42) 0%,rgba(255,253,249,.48) 54%,rgba(255,253,249,.9) 100%)}
+ .declaration-page-shadow{width:94%;top:220px;left:50%;transform:translateX(-50%);filter:sepia(1) saturate(.5) contrast(1.12);opacity:.34}
  .declaration-text{font-size:18px;line-height:1.75}
  .declaration-actions-bar{gap:7px}.declaration-actions-bar button,.declaration-actions-bar a{flex:1 1 auto;text-align:center}
  .declaration-home{padding-bottom:42px}
