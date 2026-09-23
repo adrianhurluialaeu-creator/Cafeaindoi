@@ -1,7 +1,7 @@
 import {del,get,list,put} from "@vercel/blob";
 
 export type InvitationStatus="noua"|"in_conversatie"|"inchisa";
-export type Invitation={id:string;prenume:string;varsta:number;localitate:string;tara:string;whatsapp:string;despre:string;createdAt:string;status:InvitationStatus;photoType:string;slotStart?:string;slotDuration?:number;bookingStatus?:"pending"|"confirmed"|"declined"};
+export type Invitation={id:string;prenume:string;varsta:number;localitate:string;tara:string;whatsapp:string;email?:string;despre:string;createdAt:string;status:InvitationStatus;photoType:string;slotStart?:string;slotDuration?:number;bookingStatus?:"pending"|"confirmed"|"declined";confirmationSentAt?:string};
 const recordPath=(id:string)=>`invitations/${id}.json`;
 const photoPath=(id:string)=>`invitation-photos/${id}`;
 
@@ -38,9 +38,14 @@ export async function updateInvitationStatus(id:string,status:InvitationStatus){
 }
 export async function updateBooking(id:string,bookingStatus:"pending"|"confirmed"|"declined",slotStart?:string,slotDuration?:number){
  const record=await readInvitation(id);if(!record)return null;
- const updated={...record,bookingStatus,slotStart:slotStart||record.slotStart,slotDuration:slotDuration||record.slotDuration};
+ const updated={...record,bookingStatus,slotStart:slotStart||record.slotStart,slotDuration:slotDuration||record.slotDuration,confirmationSentAt:bookingStatus==="confirmed"&&record.bookingStatus==="confirmed"&&(!slotStart||slotStart===record.slotStart)?record.confirmationSentAt:undefined};
  await put(recordPath(id),JSON.stringify(updated),{access:"private",addRandomSuffix:false,allowOverwrite:true,contentType:"application/json"});
  return updated;
+}
+export async function markConfirmationSent(id:string){
+ const record=await readInvitation(id);if(!record)return null;
+ const updated={...record,confirmationSentAt:new Date().toISOString()};
+ await put(recordPath(id),JSON.stringify(updated),{access:"private",addRandomSuffix:false,allowOverwrite:true,contentType:"application/json"});return updated;
 }
 export async function deleteInvitation(id:string){
  const record=await readInvitation(id);

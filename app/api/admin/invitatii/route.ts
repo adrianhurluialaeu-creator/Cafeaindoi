@@ -1,7 +1,8 @@
 import {createHash,timingSafeEqual} from "crypto";
 import {NextRequest,NextResponse} from "next/server";
 import {availableSlots,getSchedule} from "../../../../lib/schedule";
-import {deleteInvitation,listInvitations,updateBooking,updateInvitationStatus,type InvitationStatus} from "../../../../lib/invitations";
+import {sendConfirmationEmail} from "../../../../lib/confirmation-email";
+import {deleteInvitation,listInvitations,markConfirmationSent,updateBooking,updateInvitationStatus,type InvitationStatus} from "../../../../lib/invitations";
 export const runtime="nodejs";
 export const dynamic="force-dynamic";
 function authorized(req:NextRequest){
@@ -21,7 +22,15 @@ export async function GET(req:NextRequest){
 export async function PATCH(req:NextRequest){
  if(!authorized(req))return NextResponse.json({error:"Unauthorized"},{status:401});
  try{
-  const {id,status,bookingStatus,slotStart}=await req.json();
+  const {id,status,bookingStatus,slotStart,notify}=await req.json();
+  if(notify===true){
+   if(!validId(id))return NextResponse.json({error:"ID invalid."},{status:400});
+   const current=(await listInvitations()).find(x=>x.id===id);
+   if(!current||current.bookingStatus!=="confirmed")return NextResponse.json({error:"Confirmă mai întâi întâlnirea."},{status:409});
+   if(!current.email)return NextResponse.json({error:"Invitația nu are adresă de email."},{status:409});
+   try{await sendConfirmationEmail(current);const invitation=await markConfirmationSent(id);return NextResponse.json({invitation})}
+   catch(error){console.error("[admin/invitatii] EMAIL_ERROR",error);return NextResponse.json({error:(error as Error).message},{status:502})}
+  }
   if(bookingStatus!==undefined){
    if(!validId(id)||!["confirmed","declined"].includes(bookingStatus))return NextResponse.json({error:"Date invalide."},{status:400});
    const current=(await listInvitations()).find(x=>x.id===id);
@@ -30,7 +39,12 @@ export async function PATCH(req:NextRequest){
     const chosen=typeof slotStart==="string"&&slotStart?slotStart:current.slotStart;
     const schedule=await getSchedule();
     if(!(await availableSlots()).some(x=>x.start===chosen)&&!(current.bookingStatus==="confirmed"&&chosen===current.slotStart))return NextResponse.json({error:"Intervalul nu mai este disponibil."},{status:409});
-    const invitation=await updateBooking(id,"confirmed",chosen,schedule.duration);return NextResponse.json({invitation});
+    const invitation=await updateBooking(id,"confirmed",chosen,schedule.duration);
+    if(!invitation)return NextResponse.json({error:"Invitația nu există."},{status:404});
+    if(invitation.confirmationSentAt)return NextResponse.json({invitation});
+    if(!invitation.email)return NextResponse.json({invitation,emailError:"Invitația este confirmată, dar nu are adresă de email. Anunță persoana pe WhatsApp."});
+    try{await sendConfirmationEmail(invitation);return NextResponse.json({invitation:await markConfirmationSent(id)})}
+    catch(error){console.error("[admin/invitatii] EMAIL_ERROR",error);return NextResponse.json({invitation,emailError:"Întâlnirea este confirmată, dar emailul nu a plecat. Folosește «Retrimite emailul»."})}
    }
    return NextResponse.json({invitation:await updateBooking(id,"declined")});
   }
