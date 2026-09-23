@@ -14,6 +14,7 @@ export async function POST(req:Request){try{
  if(!prenume||!localitate||!tara||!despre||!whatsapp||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)||!Number.isInteger(varsta)||varsta<18||varsta>99||!whatsappOk||!ageOk||!privacyOk)return NextResponse.json({ok:false,error:"Verifică toate câmpurile obligatorii."},{status:400});
  if(whatsappOptIn&&!/^\+[1-9]\d{7,14}$/.test(whatsapp.replace(/[ ()-]/g,"")))return NextResponse.json({ok:false,error:"Pentru confirmarea pe WhatsApp, adaugă prefixul țării (de exemplu +40)."},{status:400});
  const hasPhoto=photo instanceof File&&photo.size>0;
+ if(!hasPhoto)return NextResponse.json({ok:false,error:"Verificarea live prin selfie sau video este obligatorie."},{status:400});
  if(hasPhoto&&!MEDIA_TYPES.has(photo.type))return NextResponse.json({ok:false,error:"Selfie-ul sau videoul are un format neacceptat."},{status:400});
  if(hasPhoto&&photo.size>MAX_MEDIA)return NextResponse.json({ok:false,error:"Materialul poate avea maximum 12 MB."},{status:413});
  const schedule=await getSchedule();

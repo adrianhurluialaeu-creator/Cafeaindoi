@@ -25,12 +25,12 @@ export default function LiveMediaCapture({onChange}:{onChange:(file:File|null)=>
  function reset(){if(preview)URL.revokeObjectURL(preview);setPreview("");onChange(null);setMode("idle");setKind(null);setSeconds(MAX_SECONDS);setError("")}
  function cancelCamera(){stopStream();setMode("idle");setKind(null)}
  return <div className="live-capture">
-  <div className="live-capture-head"><strong>Selfie sau prezentare video</strong><span>Opțional</span></div>
+  <div className="live-capture-head"><strong>Selfie sau prezentare video</strong><span>Obligatoriu</span></div>
   <p>Realizează acum un selfie sau un video fără sunet de maximum 5 secunde. Nu se poate alege din galerie.</p>
   {mode==="idle"&&<div className="live-capture-options"><button type="button" onClick={()=>void openCamera("selfie")}><span>📷</span><b>Fă un selfie</b></button><button type="button" onClick={()=>void openCamera("video")}><span>🎥</span><b>Video de 5 secunde</b></button></div>}
   {(mode==="camera"||mode==="recording")&&<div className="camera-stage"><video ref={liveRef} muted playsInline autoPlay aria-label="Previzualizare cameră frontală"/>{mode==="recording"&&<div className="recording-count"><i/> {seconds}s</div>}<div className="camera-actions">{mode==="camera"&&kind==="selfie"&&<button type="button" className="capture-main" onClick={takeSelfie}>Fă fotografia</button>}{mode==="camera"&&kind==="video"&&<button type="button" className="capture-main" onClick={recordVideo}>Începe înregistrarea</button>}{mode!=="recording"&&<button type="button" onClick={cancelCamera}>Renunță</button>}</div></div>}
   {mode==="preview"&&<div className="capture-preview">{kind==="selfie"?<img src={preview} alt="Previzualizarea selfie-ului făcut acum"/>:<video ref={previewRef} src={preview} muted playsInline controls aria-label="Previzualizarea prezentării video"/>}<div><strong>{kind==="selfie"?"Selfie pregătit":"Video pregătit · fără sunet"}</strong><button type="button" onClick={reset}>Refă</button></div></div>}
   {error&&<p className="capture-error" role="alert">{error}</p>}
-  <small>Materialul este privat și este vizibil doar pentru Adrian. Poți continua și fără el.</small>
+  <small>Materialul este privat, este vizibil doar pentru Adrian și nu va fi publicat.</small>
  </div>
 }
