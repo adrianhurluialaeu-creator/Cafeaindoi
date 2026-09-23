@@ -33,13 +33,13 @@ export async function updateInvitationStatus(id:string,status:InvitationStatus){
  const record=await readInvitation(id);
  if(!record)return null;
  const updated={...record,status};
- await put(recordPath(id),JSON.stringify(updated),{access:"private",addRandomSuffix:false,contentType:"application/json"});
+ await put(recordPath(id),JSON.stringify(updated),{access:"private",addRandomSuffix:false,allowOverwrite:true,contentType:"application/json"});
  return updated;
 }
 export async function updateBooking(id:string,bookingStatus:"pending"|"confirmed"|"declined",slotStart?:string,slotDuration?:number){
  const record=await readInvitation(id);if(!record)return null;
  const updated={...record,bookingStatus,slotStart:slotStart||record.slotStart,slotDuration:slotDuration||record.slotDuration};
- await put(recordPath(id),JSON.stringify(updated),{access:"private",addRandomSuffix:false,contentType:"application/json"});
+ await put(recordPath(id),JSON.stringify(updated),{access:"private",addRandomSuffix:false,allowOverwrite:true,contentType:"application/json"});
  return updated;
 }
 export async function deleteInvitation(id:string){
