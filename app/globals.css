@@ -304,3 +304,52 @@ button.admin-stat{cursor:pointer}.admin-stat.active{border-color:#9d765d;box-sha
  .declaration-editor .row{grid-template-columns:1fr}
  .declaration-editor-actions .btn{width:100%}
 }
+
+/* Romantic typography for declarations */
+.declarations-hero h1,
+.declaration-card-body h2,
+.declaration-letter h1,
+.declaration-home-card h3{
+  font-family:var(--font-declaration-title),Georgia,serif;
+}
+.declarations-hero h1,
+.declaration-letter h1{
+  font-style:italic;
+  font-weight:500;
+  letter-spacing:-.02em;
+}
+.declarations-hero p,
+.declaration-card-body p,
+.declaration-text,
+.declaration-home-card p{
+  font-family:var(--font-declaration-body),Georgia,serif;
+}
+.declaration-text{
+  font-size:20px;
+  line-height:1.9;
+  letter-spacing:.002em;
+}
+.declaration-text p:first-child::first-letter{
+  font-family:var(--font-declaration-title),Georgia,serif;
+  float:left;
+  font-size:3.4em;
+  line-height:.78;
+  padding:.08em .09em 0 0;
+  color:var(--coffee);
+}
+.declaration-signature{
+  font-family:var(--font-declaration-signature),cursive;
+  font-style:normal;
+  font-size:42px;
+  line-height:1;
+  color:var(--coffee);
+  margin-top:34px;
+}
+.declaration-card-body h2,
+.declaration-home-card h3{
+  font-weight:600;
+}
+@media(max-width:760px){
+  .declaration-text{font-size:17px;line-height:1.82}
+  .declaration-signature{font-size:36px}
+}
