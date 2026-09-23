@@ -1,0 +1,22 @@
+"use client";
+import {useCallback,useEffect,useState} from "react";
+import type {Invitation,InvitationStatus} from "../lib/invitations";
+const labels:Record<InvitationStatus,string>={noua:"Nouă",in_conversatie:"În conversație",inchisa:"Închisă"};
+export default function InvitationAdmin(){
+ const [rows,setRows]=useState<Invitation[]>([]);
+ const [loading,setLoading]=useState(true);
+ const [busy,setBusy]=useState<string|null>(null);
+ const [error,setError]=useState("");
+ const load=useCallback(async()=>{setLoading(true);try{const r=await fetch("/api/admin/invitatii",{cache:"no-store"});if(!r.ok)throw Error("Invitațiile nu au putut fi încărcate.");const data=await r.json();setRows(data.invitations)}catch(e){setError((e as Error).message)}finally{setLoading(false)}},[]);
+ useEffect(()=>{void load()},[load]);
+ async function change(id:string,status:InvitationStatus){setBusy(id);setError("");try{const r=await fetch("/api/admin/invitatii",{method:"PATCH",headers:{"Content-Type":"application/json"},body:JSON.stringify({id,status})});if(!r.ok)throw Error("Starea nu a putut fi schimbată.");setRows(old=>old.map(x=>x.id===id?{...x,status}:x))}catch(e){setError((e as Error).message)}finally{setBusy(null)}}
+ async function remove(id:string){if(!confirm("Ștergi definitiv invitația și fotografia din dashboard? Emailul primit se șterge separat."))return;setBusy(id);setError("");try{const r=await fetch("/api/admin/invitatii?id="+encodeURIComponent(id),{method:"DELETE"});if(!r.ok)throw Error("Invitația nu a putut fi ștearsă.");setRows(old=>old.filter(x=>x.id!==id))}catch(e){setError((e as Error).message)}finally{setBusy(null)}}
+ return <section className="invitation-admin">
+  <div className="invitation-admin-head"><div><h2>Invitații primite</h2><p>{rows.length} invitații salvate în dashboard. Invitațiile anterioare rămân în email.</p></div><button type="button" onClick={()=>void load()}>Actualizează</button></div>
+  {error&&<p role="alert" className="formerror">{error}</p>}
+  {loading?<p>Se încarcă invitațiile…</p>:rows.length===0?<p>Nu există invitații salvate încă.</p>:<div className="invitation-admin-list">{rows.map(row=><article className="invitation-admin-card" key={row.id}>
+   <img src={`/api/admin/invitatii/${row.id}/photo`} alt={`Fotografia trimisă de ${row.prenume}`} loading="lazy"/>
+   <div><div className="invitation-admin-title"><h3>{row.prenume}, {row.varsta} ani</h3><span>{labels[row.status]}</span></div><p>{row.localitate}, {row.tara} · {new Date(row.createdAt).toLocaleString("ro-RO")}</p><p className="invitation-admin-about">{row.despre}</p><a href={`https://wa.me/${row.whatsapp.replace(/\D/g,"")}`} target="_blank" rel="noopener noreferrer">WhatsApp: {row.whatsapp} ↗</a><div className="invitation-admin-actions"><label>Stare <select value={row.status} disabled={busy===row.id} onChange={e=>void change(row.id,e.target.value as InvitationStatus)}>{Object.entries(labels).map(([value,label])=><option key={value} value={value}>{label}</option>)}</select></label><button type="button" disabled={busy===row.id} onClick={()=>void remove(row.id)}>Șterge</button></div></div>
+  </article>)}</div>}
+ </section>
+}
