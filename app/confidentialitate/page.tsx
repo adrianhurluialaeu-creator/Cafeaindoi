@@ -1,6 +1,6 @@
 import MobileNav from "../../components/MobileNav";
 import Image from "next/image"; import Link from "next/link";
-export const metadata={alternates:{canonical:"/confidentialitate"}};
+export const metadata={title:"Politica de confidențialitate",description:"Cum sunt colectate, folosite, protejate și șterse datele personale trimise prin Cafea în Doi.",alternates:{canonical:"/confidentialitate"}};
 export default function Page(){return <><header><div className="wrap"><nav><Link className="brand logo-link" href="/" aria-label="Cafea în Doi — pagina principală"><Image className="site-logo" src="/images/ChatGPT Image 20 sept. 2026, 20_47_04.png" width={1536} height={512} alt="Cafea în Doi — Mai mult decât o cafea"/></Link><div className="links"><Link href="/">Acasă</Link><Link href="/povestea-mea">Povestea mea</Link><Link href="/intre-noi-doi">Între Noi Doi</Link><Link href="/blog">Gândurile mele</Link><Link href="/#invitatie">Bem o cafea?</Link><Link href="/contact">Contact</Link></div><MobileNav/></nav></div></header><main className="story"><h1>Politica de confidențialitate</h1>
 <p><strong>Ultima actualizare: 23 septembrie 2026</strong></p>
 <h2>1. Cine administrează datele</h2>
@@ -25,4 +25,4 @@ export default function Page(){return <><header><div className="wrap"><nav><Link
 <p>Sunt utilizate conexiuni HTTPS/TLS și servicii tehnice care oferă măsuri de securitate pentru transmiterea datelor. Niciun sistem online nu poate garanta însă securitate absolută.</p>
 <h2>11. Actualizări</h2>
 <p>Politica poate fi actualizată dacă se modifică formularul, furnizorii sau modul de prelucrare. Data ultimei actualizări este afișată la începutul paginii.</p>
-</main><footer><div className="wrap footer"><span>© 2026 Cafea în Doi</span><div className="links"><Link href="/termeni">Termeni</Link><Link href="/confidentialitate">Confidențialitate</Link><Link href="/cookies">Cookies</Link><Link href="/contact">Contact</Link><Link href="/admin">Privat</Link></div></div></footer></>}
+</main><footer><div className="wrap footer"><span>© 2026 Cafea în Doi</span><div className="links"><Link href="/termeni">Termeni</Link><Link href="/confidentialitate">Confidențialitate</Link><Link href="/cookies">Cookies</Link><Link href="/contact">Contact</Link></div></div></footer></>}

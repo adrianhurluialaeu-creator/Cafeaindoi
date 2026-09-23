@@ -1,6 +1,6 @@
 import MobileNav from "../../components/MobileNav";
 import Image from "next/image"; import Link from "next/link";
-export const metadata={alternates:{canonical:"/cookies"}};
+export const metadata={title:"Politica privind cookies",description:"Informații despre cookie-urile necesare, măsurarea Google Ads și opțiunile tale de consimțământ.",alternates:{canonical:"/cookies"}};
 export default function Page(){return <><header><div className="wrap"><nav><Link className="brand logo-link" href="/" aria-label="Cafea în Doi — pagina principală"><Image className="site-logo" src="/images/ChatGPT Image 20 sept. 2026, 20_47_04.png" width={1536} height={512} alt="Cafea în Doi — Mai mult decât o cafea"/></Link><div className="links"><Link href="/">Acasă</Link><Link href="/povestea-mea">Povestea mea</Link><Link href="/intre-noi-doi">Între Noi Doi</Link><Link href="/blog">Gândurile mele</Link><Link href="/#invitatie">Bem o cafea?</Link><Link href="/contact">Contact</Link></div><MobileNav/></nav></div></header><main className="story"><h1>Cookies</h1>
 <p><strong>Ultima actualizare: 22 septembrie 2026</strong></p>
 <h2>1. Ce sunt cookie-urile</h2>
@@ -17,4 +17,4 @@ export default function Page(){return <><header><div className="wrap"><nav><Link
 <p>Poți șterge sau bloca cookie-urile din setările browserului. Blocarea tehnologiilor strict necesare poate afecta funcționarea unor caracteristici ale site-ului.</p>
 <h2>7. Actualizări</h2>
 <p>Această pagină va fi actualizată dacă se schimbă tehnologiile utilizate de Cafea în Doi.</p>
-</main><footer><div className="wrap footer"><span>© 2026 Cafea în Doi</span><div className="links"><Link href="/termeni">Termeni</Link><Link href="/confidentialitate">Confidențialitate</Link><Link href="/cookies">Cookies</Link><Link href="/contact">Contact</Link><Link href="/admin">Privat</Link></div></div></footer></>}
+</main><footer><div className="wrap footer"><span>© 2026 Cafea în Doi</span><div className="links"><Link href="/termeni">Termeni</Link><Link href="/confidentialitate">Confidențialitate</Link><Link href="/cookies">Cookies</Link><Link href="/contact">Contact</Link></div></div></footer></>}
