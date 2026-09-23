@@ -22,6 +22,7 @@ Vizitatoarea trebuie să îl cunoască pe Adrian în ritmul ei, să găsească r
 
 - [x] Formular de invitație în două etape.
 - [x] Fotografie opțională la primul mesaj.
+- [x] Captură live fără galerie: selfie sau video mut de maximum 5 secunde.
 - [x] Test rapid de compatibilitate: 20 de întrebări.
 - [ ] Păstrarea testului complet de 100 de întrebări ca opțiune avansată.
 - [ ] Salvarea locală a progresului testului.
