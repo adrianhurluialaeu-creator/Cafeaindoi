@@ -249,8 +249,8 @@ button.admin-stat{cursor:pointer}.admin-stat.active{border-color:#9d765d;box-sha
 .declarations-empty{background:var(--paper);border:1px dashed var(--line);border-radius:18px;padding:42px;text-align:center}
 .declaration-detail{width:min(860px,90vw);margin:52px auto 70px}
 .declaration-letter{position:relative;isolation:isolate;overflow:hidden;background:var(--paper);border:1px solid var(--line);border-radius:24px;padding:clamp(26px,5vw,54px);box-shadow:0 22px 56px #4b2d1f0e}
-.declaration-letter::before{content:"";position:absolute;z-index:-1;inset:0;background:linear-gradient(180deg,rgba(255,253,249,.72) 0%,rgba(255,253,249,.82) 48%,rgba(255,253,249,.96) 100%)}
-.declaration-page-shadow{position:absolute;z-index:-2;width:min(92%,760px);height:auto;top:150px;left:50%;transform:translateX(-42%);filter:sepia(1) saturate(.55) contrast(1.18);opacity:.42;mix-blend-mode:multiply}
+.declaration-letter::before{content:"";position:absolute;z-index:-1;inset:0;background:rgba(255,253,249,.76)}
+.declaration-page-shadow{position:absolute;z-index:-2;width:100%;height:calc(100% - 120px);top:120px;left:0;object-fit:fill;filter:sepia(1) saturate(.5) contrast(1.12);opacity:.3;mix-blend-mode:multiply}
 .declaration-back{display:inline-block;margin-bottom:24px;color:#806453;font-size:12px;font-weight:800;text-decoration:none}
 .declaration-letter h1{font-size:clamp(42px,6vw,68px);margin:13px 0 9px}
 .declaration-date{color:#8b7b72;font-size:12px;margin-bottom:28px}
@@ -298,8 +298,8 @@ button.admin-stat{cursor:pointer}.admin-stat.active{border-color:#9d765d;box-sha
  .declaration-card-public>img{height:210px}
  .declaration-detail{margin-top:28px}
  .declaration-letter{border-radius:18px;padding:24px 20px}
- .declaration-letter::before{background:linear-gradient(180deg,rgba(255,253,249,.42) 0%,rgba(255,253,249,.48) 54%,rgba(255,253,249,.9) 100%)}
- .declaration-page-shadow{width:58%;top:210px;left:50%;transform:translateX(-50%);filter:sepia(1) saturate(.5) contrast(1.12);opacity:.32}
+ .declaration-letter::before{background:rgba(255,253,249,.72)}
+ .declaration-page-shadow{width:100%;height:calc(100% - 105px);top:105px;left:0;object-fit:fill;transform:none;opacity:.28}
  .declaration-text{font-size:18px;line-height:1.75}
  .declaration-actions-bar{gap:7px}.declaration-actions-bar button,.declaration-actions-bar a{flex:1 1 auto;text-align:center}
  .declaration-home{padding-bottom:42px}
