@@ -27,7 +27,7 @@ export async function availableSlots(){
  while(cursor.getTime()<until){
   const t=cursor.getTime(),here=local(cursor),end=local(new Date(t+schedule.duration*60_000));
   if(schedule.days.includes(here.day)&&!schedule.blockedDates.includes(here.date)&&here.date===end.date&&here.minute>=minute(schedule.start)&&end.minute<=minute(schedule.end)&&!booked.some(x=>t<x.end&&t+schedule.duration*60_000>x.start)){
-   const label=new Intl.DateTimeFormat("ro-RO",{timeZone:ZONE,weekday:"long",day:"numeric",month:"long",hour:"2-digit",minute:"2-digit"}).format(cursor)+" (ora Germaniei)";
+   const label=new Intl.DateTimeFormat("ro-RO",{timeZone:"Europe/Bucharest",weekday:"long",day:"numeric",month:"long",hour:"2-digit",minute:"2-digit"}).format(cursor)+" (ora României)";
    slots.push({start:cursor.toISOString(),label});
   }
   cursor.setTime(t+30*60_000);
