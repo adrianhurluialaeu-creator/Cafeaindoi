@@ -2,6 +2,7 @@ import "./globals.css";
 import type {Metadata} from "next";
 import {Allura,Cormorant_Garamond,Libre_Baskerville} from "next/font/google";
 import GoogleAdsConsent from "../components/GoogleAdsConsent";
+import {PersonStructuredData} from "../components/StructuredData";
 
 const declarationTitle=Cormorant_Garamond({subsets:["latin"],weight:["400","500","600"],style:["normal","italic"],display:"swap",variable:"--font-declaration-title"});
 const declarationBody=Libre_Baskerville({subsets:["latin"],weight:["400","700"],style:["normal","italic"],display:"swap",variable:"--font-declaration-body"});
@@ -18,5 +19,5 @@ export const metadata:Metadata={
 };
 
 export default function RootLayout({children}:{children:React.ReactNode}){
- return <html lang="ro" className={`${declarationTitle.variable} ${declarationBody.variable} ${declarationSignature.variable}`}><body>{children}<GoogleAdsConsent/></body></html>
+ return <html lang="ro" className={`${declarationTitle.variable} ${declarationBody.variable} ${declarationSignature.variable}`}><body><PersonStructuredData/>{children}<GoogleAdsConsent/></body></html>
 }

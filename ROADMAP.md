@@ -16,7 +16,7 @@ Vizitatoarea trebuie să îl cunoască pe Adrian în ritmul ei, să găsească r
 - [x] Banner cookies mai compact pe mobil și desktop.
 - [ ] Uniformizarea meniului desktop pe toate paginile.
 - [ ] Limitare persistentă pentru autentificare și formulare.
-- [ ] Verificarea conținutului real al fișierelor încărcate.
+- [x] Verificarea conținutului real al fișierelor încărcate.
 
 ## Etapa 2 — Conversie și cunoaștere graduală
 
@@ -31,7 +31,8 @@ Vizitatoarea trebuie să îl cunoască pe Adrian în ritmul ei, să găsească r
 ## Etapa 3 — SEO, distribuire și performanță
 
 - [ ] Imagine socială dedicată, format 1200 × 630 px.
-- [ ] Date structurate Person, Article și BreadcrumbList.
+- [x] Date structurate Person și BreadcrumbList.
+- [ ] Date structurate Article pentru fiecare articol.
 - [ ] Data publicării și actualizării pentru articole.
 - [ ] Conversia imaginilor mari în WebP/AVIF.
 - [ ] Încărcare progresivă pentru galeria foto.

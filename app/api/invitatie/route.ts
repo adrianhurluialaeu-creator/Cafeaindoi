@@ -17,6 +17,11 @@ export async function POST(req:Request){try{
  if(!hasPhoto)return NextResponse.json({ok:false,error:"Verificarea live prin selfie sau video este obligatorie."},{status:400});
  if(hasPhoto&&!MEDIA_TYPES.has(photo.type))return NextResponse.json({ok:false,error:"Selfie-ul sau videoul are un format neacceptat."},{status:400});
  if(hasPhoto&&photo.size>MAX_MEDIA)return NextResponse.json({ok:false,error:"Materialul poate avea maximum 12 MB."},{status:413});
+ const signature=Buffer.from(await photo.slice(0,16).arrayBuffer());
+ const isJpeg=photo.type==="image/jpeg"&&signature[0]===0xff&&signature[1]===0xd8&&signature[2]===0xff;
+ const isWebm=photo.type==="video/webm"&&signature[0]===0x1a&&signature[1]===0x45&&signature[2]===0xdf&&signature[3]===0xa3;
+ const isMp4=photo.type==="video/mp4"&&signature.subarray(4,12).toString("ascii").includes("ftyp");
+ if(!isJpeg&&!isWebm&&!isMp4)return NextResponse.json({ok:false,error:"Conținutul selfie-ului sau videoului nu este valid."},{status:400});
  const schedule=await getSchedule();
 
  if(schedule.enabled&&(!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.000Z$/.test(slotStart)||!(await availableSlots()).some(x=>x.start===slotStart)))return NextResponse.json({ok:false,error:"Ora aleasă nu mai este disponibilă. Alege alt interval."},{status:409});
