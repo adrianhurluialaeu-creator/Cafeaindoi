@@ -1,3 +1,4 @@
 import AdminShell from "../../../components/AdminShell";
+import ScheduleAdmin from "../../../components/ScheduleAdmin";
 export const metadata={title:"Setări · Admin",robots:{index:false,follow:false}};
-export default function Page(){return <AdminShell title="Setări" subtitle="Configurarea generală a site-ului și modulelor."><section className="admin-v2-placeholder"><div className="admin-v2-placeholder-icon">⚙</div><h2>Setări</h2><p>Aici putem adăuga setări pentru moderare, notificări, email, SEO și integrarea modulelor.</p><span>Modul pregătit pentru extindere</span></section></AdminShell>}
+export default function Page(){return <AdminShell title="Setări" subtitle="Configurează disponibilitatea pentru prima cafea."><ScheduleAdmin/></AdminShell>}
