@@ -11,10 +11,12 @@
     "@types/node": "latest",
     "@types/react": "latest",
     "@types/react-dom": "latest",
+    "@types/web-push": "^3.6.4",
+    "@vercel/blob": "2.6.1",
     "next": "latest",
     "react": "latest",
     "react-dom": "latest",
     "typescript": "latest",
-    "@vercel/blob": "2.6.1"
+    "web-push": "^3.6.7"
   }
 }
