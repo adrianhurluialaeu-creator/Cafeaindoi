@@ -8,7 +8,7 @@ export async function GET(req:NextRequest,{params}:{params:Promise<{id:string}>}
  if(!/^[0-9a-f-]{36}$/i.test(id))return NextResponse.json({error:"Invalid id"},{status:400});
  try{
   const record=await readInvitation(id);
-  if(!record)return NextResponse.json({error:"Not found"},{status:404});
+  if(!record||!record.photoType)return NextResponse.json({error:"Not found"},{status:404});
   const photo=await readInvitationPhoto(id);
   if(!photo||photo.statusCode!==200)return NextResponse.json({error:"Not found"},{status:404});
   return new NextResponse(photo.stream,{headers:{"Content-Type":record.photoType,"Cache-Control":"private, no-store","X-Content-Type-Options":"nosniff","Content-Disposition":"inline"}});

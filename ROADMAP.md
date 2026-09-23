@@ -20,9 +20,9 @@ Vizitatoarea trebuie să îl cunoască pe Adrian în ritmul ei, să găsească r
 
 ## Etapa 2 — Conversie și cunoaștere graduală
 
-- [ ] Formular de invitație în două etape.
-- [ ] Fotografie opțională la primul mesaj, solicitată ulterior dacă există interes reciproc.
-- [ ] Test rapid de compatibilitate: 20 de întrebări.
+- [x] Formular de invitație în două etape.
+- [x] Fotografie opțională la primul mesaj.
+- [x] Test rapid de compatibilitate: 20 de întrebări.
 - [ ] Păstrarea testului complet de 100 de întrebări ca opțiune avansată.
 - [ ] Salvarea locală a progresului testului.
 - [ ] Explicație clară despre durata fiecărui test.

@@ -1,16 +1,16 @@
 import {del,get,list,put} from "@vercel/blob";
 
 export type InvitationStatus="noua"|"in_conversatie"|"inchisa";
-export type Invitation={id:string;prenume:string;varsta:number;localitate:string;tara:string;whatsapp:string;whatsappOptIn?:boolean;email?:string;despre:string;createdAt:string;status:InvitationStatus;photoType:string;slotStart?:string;slotDuration?:number;bookingStatus?:"pending"|"confirmed"|"declined";confirmationSentAt?:string;whatsappConfirmationSentAt?:string;whatsappMessageId?:string};
+export type Invitation={id:string;prenume:string;varsta:number;localitate:string;tara:string;whatsapp:string;whatsappOptIn?:boolean;email?:string;despre:string;createdAt:string;status:InvitationStatus;photoType?:string;slotStart?:string;slotDuration?:number;bookingStatus?:"pending"|"confirmed"|"declined";confirmationSentAt?:string;whatsappConfirmationSentAt?:string;whatsappMessageId?:string};
 const recordPath=(id:string)=>`invitations/${id}.json`;
 const photoPath=(id:string)=>`invitation-photos/${id}`;
 
-export async function saveInvitation(input:Omit<Invitation,"id"|"createdAt"|"status">,photo:File){
+export async function saveInvitation(input:Omit<Invitation,"id"|"createdAt"|"status">,photo?:File){
  const id=crypto.randomUUID();
  const record:Invitation={...input,id,createdAt:new Date().toISOString(),status:"noua"};
- await put(photoPath(id),Buffer.from(await photo.arrayBuffer()),{access:"private",addRandomSuffix:false,contentType:photo.type});
+ if(photo)await put(photoPath(id),Buffer.from(await photo.arrayBuffer()),{access:"private",addRandomSuffix:false,contentType:photo.type});
  try{await put(recordPath(id),JSON.stringify(record),{access:"private",addRandomSuffix:false,contentType:"application/json"})}
- catch(error){await del(photoPath(id));throw error}
+ catch(error){if(photo)await del(photoPath(id));throw error}
  return record;
 }
 export async function readInvitation(id:string){
@@ -55,7 +55,7 @@ export async function markWhatsAppSent(id:string,messageId:string){
 export async function deleteInvitation(id:string){
  const record=await readInvitation(id);
  if(!record)return false;
- await del([recordPath(id),photoPath(id)]);
+ await del(record.photoType?[recordPath(id),photoPath(id)]:recordPath(id));
  return true;
 }
 export async function readInvitationPhoto(id:string){return get(photoPath(id),{access:"private",useCache:false})}
