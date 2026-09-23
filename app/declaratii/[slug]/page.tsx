@@ -23,15 +23,11 @@ export default async function Page({params}:{params:Promise<{slug:string}>}){
   <header><div className="wrap"><nav><Link className="brand logo-link" href="/"><img className="site-logo" src={logo} alt="Cafea în Doi"/></Link><div className="links"><Link href="/">Acasă</Link><Link href="/blog">Gândurile mele</Link><Link href="/declaratii">Declarații</Link><Link href="/intre-noi-doi">Între Noi Doi</Link><Link href="/contact">Contact</Link></div><MobileNav/></nav></div></header>
   <main className="declaration-detail">
    <article className="declaration-letter">
+    <Image className="declaration-page-shadow" src="/images/adrian-declaration-shadow.png" width={1371} height={1090} alt="" aria-hidden="true" priority/>
     <Link className="declaration-back" href="/declaratii">← Toate declarațiile</Link>
-    <div className="declaration-title-scene">
-     <Image className="declaration-title-shadow" src="/images/adrian-declaration-shadow.png" fill sizes="(max-width: 900px) 90vw, 760px" alt="" aria-hidden="true" priority/>
-     <div className="declaration-title-content">
-      <span className="declaration-category">{d.category}</span>
-      <h1>{d.title}</h1>
-      <div className="declaration-date">{new Date(d.publishedAt||d.createdAt).toLocaleDateString("ro-RO",{day:"numeric",month:"long",year:"numeric"})}</div>
-     </div>
-    </div>
+    <span className="declaration-category">{d.category}</span>
+    <h1>{d.title}</h1>
+    <div className="declaration-date">{new Date(d.publishedAt||d.createdAt).toLocaleDateString("ro-RO",{day:"numeric",month:"long",year:"numeric"})}</div>
     {d.imageUrl&&<img className="declaration-hero-image" src={d.imageUrl} alt=""/>}
     <div className="declaration-text">{d.text.split(/\n{2,}/).map((p,i)=><p key={i}>{p}</p>)}</div>
     <div className="declaration-signature">— Adrian</div>
