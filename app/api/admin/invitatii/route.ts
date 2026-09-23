@@ -2,7 +2,8 @@ import {createHash,timingSafeEqual} from "crypto";
 import {NextRequest,NextResponse} from "next/server";
 import {availableSlots,getSchedule} from "../../../../lib/schedule";
 import {sendConfirmationEmail} from "../../../../lib/confirmation-email";
-import {deleteInvitation,listInvitations,markConfirmationSent,updateBooking,updateInvitationStatus,type InvitationStatus} from "../../../../lib/invitations";
+import {sendWhatsAppConfirmation} from "../../../../lib/whatsapp-confirmation";
+import {deleteInvitation,listInvitations,markConfirmationSent,markWhatsAppSent,readInvitation,updateBooking,updateInvitationStatus,type InvitationStatus} from "../../../../lib/invitations";
 export const runtime="nodejs";
 export const dynamic="force-dynamic";
 function authorized(req:NextRequest){
@@ -22,7 +23,15 @@ export async function GET(req:NextRequest){
 export async function PATCH(req:NextRequest){
  if(!authorized(req))return NextResponse.json({error:"Unauthorized"},{status:401});
  try{
-  const {id,status,bookingStatus,slotStart,notify}=await req.json();
+  const {id,status,bookingStatus,slotStart,notify,notifyWhatsapp}=await req.json();
+  if(notifyWhatsapp===true){
+   if(!validId(id))return NextResponse.json({error:"ID invalid."},{status:400});
+   const current=await readInvitation(id);
+   if(!current||current.bookingStatus!=="confirmed")return NextResponse.json({error:"Confirmă mai întâi întâlnirea."},{status:409});
+   if(!current.whatsappOptIn)return NextResponse.json({error:"Persoana nu a ales confirmarea pe WhatsApp."},{status:409});
+   try{const messageId=await sendWhatsAppConfirmation(current);return NextResponse.json({invitation:await markWhatsAppSent(id,messageId)})}
+   catch(error){console.error("[admin/invitatii] WHATSAPP_ERROR",error);return NextResponse.json({error:(error as Error).message},{status:502})}
+  }
   if(notify===true){
    if(!validId(id))return NextResponse.json({error:"ID invalid."},{status:400});
    const current=(await listInvitations()).find(x=>x.id===id);
@@ -41,10 +50,17 @@ export async function PATCH(req:NextRequest){
     if(!(await availableSlots()).some(x=>x.start===chosen)&&!(current.bookingStatus==="confirmed"&&chosen===current.slotStart))return NextResponse.json({error:"Intervalul nu mai este disponibil."},{status:409});
     const invitation=await updateBooking(id,"confirmed",chosen,schedule.duration);
     if(!invitation)return NextResponse.json({error:"Invitația nu există."},{status:404});
-    if(invitation.confirmationSentAt)return NextResponse.json({invitation});
-    if(!invitation.email)return NextResponse.json({invitation,emailError:"Invitația este confirmată, dar nu are adresă de email. Anunță persoana pe WhatsApp."});
-    try{await sendConfirmationEmail(invitation);return NextResponse.json({invitation:await markConfirmationSent(id)})}
-    catch(error){console.error("[admin/invitatii] EMAIL_ERROR",error);return NextResponse.json({invitation,emailError:"Întâlnirea este confirmată, dar emailul nu a plecat. Folosește «Retrimite emailul»."})}
+    const warnings:string[]=[];
+    if(!invitation.confirmationSentAt){
+     if(!invitation.email)warnings.push("Invitația nu are adresă de email.");
+     else try{await sendConfirmationEmail(invitation);await markConfirmationSent(id)}
+     catch(error){console.error("[admin/invitatii] EMAIL_ERROR",error);warnings.push("Emailul nu a plecat. Folosește «Retrimite emailul».")}
+    }
+    if(invitation.whatsappOptIn&&!invitation.whatsappConfirmationSentAt){
+     try{const messageId=await sendWhatsAppConfirmation(invitation);await markWhatsAppSent(id,messageId)}
+     catch(error){console.error("[admin/invitatii] WHATSAPP_ERROR",error);warnings.push("WhatsApp nu a plecat. Verifică configurarea Meta și folosește «Retrimite WhatsApp».")}
+    }
+    return NextResponse.json({invitation:await readInvitation(id),notificationWarning:warnings.join(" ")});
    }
    return NextResponse.json({invitation:await updateBooking(id,"declined")});
   }
