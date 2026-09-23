@@ -10,7 +10,7 @@ const parts=new Intl.DateTimeFormat("en-GB",{timeZone:ZONE,year:"numeric",month:
 function local(instant:Date){const p=Object.fromEntries(parts.formatToParts(instant).map(x=>[x.type,x.value]));return {date:`${p.year}-${p.month}-${p.day}`,minute:Number(p.hour)*60+Number(p.minute),day:["Sun","Mon","Tue","Wed","Thu","Fri","Sat"].indexOf(p.weekday)};}
 const minute=(time:string)=>Number(time.slice(0,2))*60+Number(time.slice(3));
 export async function getSchedule():Promise<Schedule>{const blob=await get(PATH,{access:"private",useCache:false});if(!blob||blob.statusCode!==200)return defaults;return JSON.parse(await new Response(blob.stream).text()) as Schedule}
-export async function saveSchedule(value:Schedule){await put(PATH,JSON.stringify(value),{access:"private",addRandomSuffix:false,contentType:"application/json"});return value}
+export async function saveSchedule(value:Schedule){await put(PATH,JSON.stringify(value),{access:"private",addRandomSuffix:false,allowOverwrite:true,contentType:"application/json"});return value}
 export function validateSchedule(data:any):Schedule|null{
  if(typeof data?.enabled!=="boolean"||!Array.isArray(data.days)||!data.days.every((d:unknown)=>Number.isInteger(d)&&Number(d)>=0&&Number(d)<=6)||!Array.isArray(data.blockedDates)||data.blockedDates.length>120||!data.blockedDates.every((d:unknown)=>typeof d==="string"&&/^\d{4}-\d{2}-\d{2}$/.test(d))||!/^([01]\d|2[0-3]):[0-5]\d$/.test(data.start)||!/^([01]\d|2[0-3]):[0-5]\d$/.test(data.end)||![30,60].includes(data.duration))return null;
  if(minute(data.end)<=minute(data.start)||minute(data.end)-minute(data.start)<data.duration||minute(data.start)%30||minute(data.end)%30)return null;
