@@ -1,6 +1,7 @@
 import {createHash,timingSafeEqual} from "crypto";
 import {NextRequest,NextResponse} from "next/server";
-import {deleteInvitation,listInvitations,updateInvitationStatus,type InvitationStatus} from "../../../../lib/invitations";
+import {availableSlots,getSchedule} from "../../../../lib/schedule";
+import {deleteInvitation,listInvitations,updateBooking,updateInvitationStatus,type InvitationStatus} from "../../../../lib/invitations";
 export const runtime="nodejs";
 export const dynamic="force-dynamic";
 function authorized(req:NextRequest){
@@ -20,7 +21,19 @@ export async function GET(req:NextRequest){
 export async function PATCH(req:NextRequest){
  if(!authorized(req))return NextResponse.json({error:"Unauthorized"},{status:401});
  try{
-  const {id,status}=await req.json();
+  const {id,status,bookingStatus,slotStart}=await req.json();
+  if(bookingStatus!==undefined){
+   if(!validId(id)||!["confirmed","declined"].includes(bookingStatus))return NextResponse.json({error:"Date invalide."},{status:400});
+   const current=(await listInvitations()).find(x=>x.id===id);
+   if(!current||!current.slotStart)return NextResponse.json({error:"Invitația nu are o oră propusă."},{status:404});
+   if(bookingStatus==="confirmed"){
+    const chosen=typeof slotStart==="string"&&slotStart?slotStart:current.slotStart;
+    const schedule=await getSchedule();
+    if(!(await availableSlots()).some(x=>x.start===chosen)&&!(current.bookingStatus==="confirmed"&&chosen===current.slotStart))return NextResponse.json({error:"Intervalul nu mai este disponibil."},{status:409});
+    const invitation=await updateBooking(id,"confirmed",chosen,schedule.duration);return NextResponse.json({invitation});
+   }
+   return NextResponse.json({invitation:await updateBooking(id,"declined")});
+  }
   if(!validId(id)||!["noua","in_conversatie","inchisa"].includes(status))return NextResponse.json({error:"Date invalide."},{status:400});
   const invitation=await updateInvitationStatus(id,status as InvitationStatus);
   return invitation?NextResponse.json({invitation}):NextResponse.json({error:"Invitația nu există."},{status:404});
