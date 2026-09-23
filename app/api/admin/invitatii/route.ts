@@ -3,7 +3,7 @@ import {NextRequest,NextResponse} from "next/server";
 import {availableSlots,getSchedule} from "../../../../lib/schedule";
 import {sendConfirmationEmail} from "../../../../lib/confirmation-email";
 import {sendMeetingLocationEmail} from "../../../../lib/meeting-email";
-import {deleteInvitation,listInvitations,markConfirmationSent,readInvitation,updateBooking,updateInvitationStatus,updateJourney,type InvitationStatus,type JourneyStage,type PhysicalMeeting} from "../../../../lib/invitations";
+import {deleteInvitation,listInvitations,markConfirmationSent,readInvitation,updateBooking,updateInvitationStatus,updateJourney,type Challenge,type InvitationStatus,type JourneyStage,type PhysicalMeeting,type SharedExperience} from "../../../../lib/invitations";
 export const runtime="nodejs";
 export const dynamic="force-dynamic";
 function authorized(req:NextRequest){
@@ -23,12 +23,17 @@ export async function GET(req:NextRequest){
 export async function PATCH(req:NextRequest){
  if(!authorized(req))return NextResponse.json({error:"Unauthorized"},{status:401});
  try{
-  const {id,status,bookingStatus,slotStart,notify,journeyStage,onlineSessions,physicalMeeting,shareLocation}=await req.json();
-  if(journeyStage!==undefined||onlineSessions!==undefined||physicalMeeting!==undefined||shareLocation===true){
+  const {id,status,bookingStatus,slotStart,notify,journeyStage,onlineSessions,challenges,physicalMeeting,sharedExperience,shareLocation}=await req.json();
+  if(journeyStage!==undefined||onlineSessions!==undefined||challenges!==undefined||physicalMeeting!==undefined||sharedExperience!==undefined||shareLocation===true){
    if(!validId(id))return NextResponse.json({error:"ID invalid."},{status:400});
-   const stages=["invitatie","online","eu_la_ea","ea_la_mine"];
+   const stages=["invitatie","online","eu_la_ea","ea_la_mine","experienta"];
    if(journeyStage!==undefined&&!stages.includes(journeyStage))return NextResponse.json({error:"Etapă invalidă."},{status:400});
    if(onlineSessions!==undefined&&(!Number.isInteger(onlineSessions)||onlineSessions<0||onlineSessions>999))return NextResponse.json({error:"Număr de ședințe invalid."},{status:400});
+   let cleanChallenges:Challenge[]|undefined;
+   if(challenges!==undefined){
+    if(!Array.isArray(challenges)||challenges.length>50)return NextResponse.json({error:"Lista provocărilor este invalidă."},{status:400});
+    cleanChallenges=challenges.map((item:Challenge)=>({id:/^[0-9a-f-]{36}$/i.test(String(item.id))?String(item.id):crypto.randomUUID(),proposer:item.proposer==="ea"?("ea" as const):("adrian" as const),title:String(item.title||"").trim().slice(0,120),description:String(item.description||"").trim().slice(0,600)||undefined,status:["propusa","acceptata","finalizata","refuzata"].includes(item.status)?item.status:"propusa",createdAt:item.createdAt&&Number.isFinite(Date.parse(item.createdAt))?item.createdAt:new Date().toISOString()})).filter(item=>item.title);
+   }
    let meeting:PhysicalMeeting|undefined;
    if(physicalMeeting!==undefined){
     if(!physicalMeeting||!["eu_la_ea","ea_la_mine"].includes(physicalMeeting.direction)||!["propusa","confirmata","finalizata","anulata"].includes(physicalMeeting.status))return NextResponse.json({error:"Datele întâlnirii sunt invalide."},{status:400});
@@ -37,7 +42,14 @@ export async function PATCH(req:NextRequest){
     if(!meeting.city)return NextResponse.json({error:"Completează orașul întâlnirii."},{status:400});
     if(meeting.mapUrl&&!/^https:\/\/(maps\.app\.goo\.gl|www\.google\.[^/]+\/maps|maps\.google\.[^/]+)/i.test(meeting.mapUrl))return NextResponse.json({error:"Folosește un link Google Maps valid."},{status:400});
    }
-   let invitation=await updateJourney(id,{...(journeyStage!==undefined?{journeyStage:journeyStage as JourneyStage}:{}),...(onlineSessions!==undefined?{onlineSessions}:{}),...(meeting?{physicalMeeting:meeting}:{})});
+   let experience:SharedExperience|undefined;
+   if(sharedExperience!==undefined){
+    if(!sharedExperience||!["propusa","acceptata","planificata","finalizata","anulata"].includes(sharedExperience.status))return NextResponse.json({error:"Experiența comună este invalidă."},{status:400});
+    const clean=(value:unknown,max:number)=>String(value||"").trim().slice(0,max);
+    experience={status:sharedExperience.status,type:clean(sharedExperience.type,120),destination:clean(sharedExperience.destination,160)||undefined,startDate:clean(sharedExperience.startDate,20)||undefined,endDate:clean(sharedExperience.endDate,20)||undefined,budget:clean(sharedExperience.budget,80)||undefined,note:clean(sharedExperience.note,600)||undefined};
+    if(!experience.type)return NextResponse.json({error:"Completează tipul experienței."},{status:400});
+   }
+   let invitation=await updateJourney(id,{...(journeyStage!==undefined?{journeyStage:journeyStage as JourneyStage}:{}),...(onlineSessions!==undefined?{onlineSessions}:{}),...(cleanChallenges?{challenges:cleanChallenges}:{}),...(meeting?{physicalMeeting:meeting}:{}),...(experience?{sharedExperience:experience}:{})});
    if(!invitation)return NextResponse.json({error:"Invitația nu există."},{status:404});
    if(shareLocation===true){
     try{await sendMeetingLocationEmail(invitation);invitation=await updateJourney(id,{physicalMeeting:{...invitation.physicalMeeting!,locationSharedAt:new Date().toISOString()}})}
