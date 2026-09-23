@@ -302,9 +302,9 @@ button.admin-stat{cursor:pointer}.admin-stat.active{border-color:#9d765d;box-sha
  .declaration-card-public>img{height:210px}
  .declaration-detail{margin-top:28px}
  .declaration-letter{border-radius:18px;padding:24px 20px}
- .declaration-title-scene{min-height:330px;margin:0 -4px 24px;padding:36px 24px 28px;align-items:flex-end}
- .declaration-title-scene::after{background:linear-gradient(180deg,rgba(250,245,240,.02) 0%,rgba(250,245,240,.18) 38%,rgba(250,245,240,.78) 73%,#faf5f0 100%)}
- .declaration-title-shadow{object-position:center bottom;filter:sepia(1) saturate(.62) contrast(1.28);opacity:.52;transform:translateY(-7%) scale(1.04);transform-origin:center bottom}
+ .declaration-title-scene{min-height:400px;margin:0 -4px 24px;padding:36px 24px 28px;align-items:flex-end}
+ .declaration-title-scene::after{background:linear-gradient(180deg,rgba(250,245,240,.01) 0%,rgba(250,245,240,.1) 46%,rgba(250,245,240,.82) 72%,#faf5f0 100%)}
+ .declaration-title-shadow{object-position:center top;filter:sepia(1) saturate(.62) contrast(1.28);opacity:.5;transform:translate(13%,-8%) scale(.78);transform-origin:center top}
  .declaration-title-content{max-width:100%}
  .declaration-text{font-size:18px;line-height:1.75}
  .declaration-actions-bar{gap:7px}.declaration-actions-bar button,.declaration-actions-bar a{flex:1 1 auto;text-align:center}
