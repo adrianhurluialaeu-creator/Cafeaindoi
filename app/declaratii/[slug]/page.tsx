@@ -25,7 +25,7 @@ export default async function Page({params}:{params:Promise<{slug:string}>}){
    <article className="declaration-letter">
     <Link className="declaration-back" href="/declaratii">← Toate declarațiile</Link>
     <div className="declaration-title-scene">
-     <Image className="declaration-title-shadow" src="/images/01_cafea_in_doi.png" fill sizes="(max-width: 900px) 90vw, 760px" alt="" aria-hidden="true" priority/>
+     <Image className="declaration-title-shadow" src="/images/adrian-declaration-shadow.png" fill sizes="(max-width: 900px) 90vw, 760px" alt="" aria-hidden="true" priority/>
      <div className="declaration-title-content">
       <span className="declaration-category">{d.category}</span>
       <h1>{d.title}</h1>
