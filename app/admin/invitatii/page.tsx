@@ -1,3 +1,4 @@
 import AdminShell from "../../../components/AdminShell";
+import InvitationAdmin from "../../../components/InvitationAdmin";
 export const metadata={title:"Invitații · Admin",robots:{index:false,follow:false}};
-export default function Page(){return <AdminShell title="Invitații" subtitle="Gestionează invitațiile primite prin formular."><section className="admin-v2-placeholder"><div className="admin-v2-placeholder-icon">☕</div><h2>Invitații</h2><p>Aici putem adăuga ulterior listă, statusuri, notițe și acțiuni pentru fiecare invitație.</p><span>Modul pregătit pentru extindere</span></section></AdminShell>}
+export default function Page(){return <AdminShell title="Invitații" subtitle="Gestionează invitațiile primite prin formular."><InvitationAdmin/></AdminShell>}
