@@ -1,7 +1,7 @@
 import {del,get,list,put} from "@vercel/blob";
 
 export type InvitationStatus="noua"|"in_conversatie"|"inchisa";
-export type Invitation={id:string;prenume:string;varsta:number;localitate:string;tara:string;whatsapp:string;despre:string;createdAt:string;status:InvitationStatus;photoType:string};
+export type Invitation={id:string;prenume:string;varsta:number;localitate:string;tara:string;whatsapp:string;despre:string;createdAt:string;status:InvitationStatus;photoType:string;slotStart?:string;slotDuration?:number;bookingStatus?:"pending"|"confirmed"|"declined"};
 const recordPath=(id:string)=>`invitations/${id}.json`;
 const photoPath=(id:string)=>`invitation-photos/${id}`;
 
@@ -33,6 +33,12 @@ export async function updateInvitationStatus(id:string,status:InvitationStatus){
  const record=await readInvitation(id);
  if(!record)return null;
  const updated={...record,status};
+ await put(recordPath(id),JSON.stringify(updated),{access:"private",addRandomSuffix:false,contentType:"application/json"});
+ return updated;
+}
+export async function updateBooking(id:string,bookingStatus:"pending"|"confirmed"|"declined",slotStart?:string,slotDuration?:number){
+ const record=await readInvitation(id);if(!record)return null;
+ const updated={...record,bookingStatus,slotStart:slotStart||record.slotStart,slotDuration:slotDuration||record.slotDuration};
  await put(recordPath(id),JSON.stringify(updated),{access:"private",addRandomSuffix:false,contentType:"application/json"});
  return updated;
 }
