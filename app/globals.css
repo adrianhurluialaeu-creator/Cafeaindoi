@@ -366,3 +366,8 @@ button.admin-stat{cursor:pointer}.admin-stat.active{border-color:#9d765d;box-sha
 .manual-whatsapp-link{display:inline-flex;align-items:center;margin:.35rem 0;padding:.7rem 1rem;border-radius:10px;background:#217447;color:#fff;text-decoration:none;font-weight:600}.manual-whatsapp-link:hover{background:#185c37;color:#fff}
 
 /* Full portrait declaration background. */
+
+.home-purpose{margin:22px 0 20px;padding:18px 20px;background:#fffaf4;border:1px solid var(--line);border-left:4px solid #b87545;border-radius:14px}
+.home-purpose h2{font-size:25px;margin:0 0 8px}
+.home-purpose p{margin:0;color:#5d5049;line-height:1.65}
+@media(max-width:600px){.home-purpose{padding:16px}.home-purpose h2{font-size:23px}}
