@@ -1,3 +1,7 @@
-"use client";
-import {useEffect,useState} from "react";
-export default function WhatsAppSettings(){const [value,setValue]=useState<{configured:boolean;templateName:string|null}|null>(null);useEffect(()=>{fetch("/api/admin/whatsapp",{cache:"no-store"}).then(r=>r.json()).then(setValue).catch(()=>{})},[]);return <section className="schedule-admin push-settings"><h2>Confirmări WhatsApp</h2><p>Persoana trebuie să bifeze separat acordul din formular. După confirmarea orei, site-ul trimite mesajul automat prin WhatsApp Business Platform.</p><p><strong>Configurare:</strong> {value?value.configured?`Conexiunea API este configurată. Șablon: ${value.templateName}.`:"Conexiunea Meta lipsește. Emailul poate funcționa în continuare.":"Se verifică…"}</p><p>Șablonul aprobat în Meta trebuie să aibă două variabile, în această ordine: prenumele și ziua/ora în fusul României.</p></section>}
+export default function WhatsAppSettings(){
+ return <section className="schedule-admin push-settings">
+  <h2>Confirmări WhatsApp</h2>
+  <p>După ce confirmi o rezervare, în Invitații primite apare butonul „Deschide confirmarea în WhatsApp”. Mesajul conține automat prenumele, ziua și ora României.</p>
+  <p>Verifică mesajul în conversația persoanei și apasă Trimite. Emailul de confirmare se trimite separat, automat.</p>
+ </section>;
+}
