@@ -5,7 +5,7 @@ import {countDeclarationLikes,listDeclarations} from "../../lib/declarations";
 export const metadata={title:"Declarații de dragoste",description:"Declarații de dragoste, dor, promisiuni și gânduri scrise de Adrian — Cafea în Doi.",alternates:{canonical:"/declaratii"}};
 export const dynamic="force-dynamic";
 
-const logo="/images/ChatGPT Image 20 sept. 2026, 20_47_04.png";
+const logo="/images/ChatGPT Image 20 sept. 2026, 20_47_04.webp";
 
 export default async function Page(){
  const declarations=await listDeclarations("published");

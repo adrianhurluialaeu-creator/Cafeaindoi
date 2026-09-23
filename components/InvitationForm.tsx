@@ -41,7 +41,7 @@ export default function InvitationForm(){
    <div className="invite-actions"><button type="button" className="btn alt" onClick={()=>setStep(1)}>← Înapoi</button><button type="button" className="btn" disabled={loadingSlots||enabled&&!slots.length} onClick={nextFromContact}>Continuă →</button></div>
   </section>
   <section className={step===3?"invite-step active":"invite-step"} aria-hidden={step!==3}>
-   <h3>Verificare live</h3><p>Ultimul pas. Fă un selfie sau un video mut de maximum 5 secunde pentru a confirma că invitația este reală.</p>
+   <h3>Verificare live</h3><p>Ultimul pas. Fă un selfie sau un video mut de maximum 5 secunde pentru a reduce invitațiile false sau automate.</p>
    <LiveMediaCapture onChange={setMedia}/>
    <div aria-hidden="true" style={{position:"absolute",left:"-10000px",width:1,height:1,overflow:"hidden"}}><label htmlFor="invite-website">Website</label><input id="invite-website" name="website" tabIndex={-1} autoComplete="off"/></div>
    <label className="check"><input name="ageOk" type="checkbox" required tabIndex={step===3?0:-1}/>Confirm că am cel puțin 18 ani.</label>

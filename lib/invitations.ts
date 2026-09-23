@@ -28,7 +28,12 @@ export async function listInvitations(){
  do{
   const page=await list({prefix:"invitations/",limit:1000,cursor});
   const records=await Promise.all(page.blobs.map(b=>readInvitation(b.pathname.split("/").pop()!.replace(/\.json$/,""))));
-  rows.push(...records.filter((r):r is Invitation=>r!==null));
+  for(const record of records.filter((r):r is Invitation=>r!==null)){
+   const expired=Date.now()-Date.parse(record.createdAt)>90*864e5;
+   if(expired&&record.status!=="in_conversatie"&&record.portalAccessStatus!=="active"){
+    try{await del(record.photoType?[recordPath(record.id),photoPath(record.id)]:recordPath(record.id))}catch(error){console.error("[invitations] RETENTION_CLEANUP_ERROR",error)}
+   }else rows.push(record);
+  }
   cursor=page.hasMore?page.cursor:undefined;
  }while(cursor);
  return rows.sort((a,b)=>b.createdAt.localeCompare(a.createdAt));

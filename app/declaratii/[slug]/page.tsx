@@ -3,15 +3,17 @@ import Image from "next/image";
 import {notFound} from "next/navigation";
 import MobileNav from "../../../components/MobileNav";
 import DeclarationInteractions from "../../../components/DeclarationInteractions";
+import {ArticleStructuredData} from "../../../components/StructuredData";
 import {countDeclarationLikes,getPublishedDeclarationBySlug} from "../../../lib/declarations";
 
 export const dynamic="force-dynamic";
-const logo="/images/ChatGPT Image 20 sept. 2026, 20_47_04.png";
+const logo="/images/ChatGPT Image 20 sept. 2026, 20_47_04.webp";
 
 export async function generateMetadata({params}:{params:Promise<{slug:string}>}){
  const {slug}=await params;const d=await getPublishedDeclarationBySlug(slug);
  if(!d)return {title:"Declarație"};
- return {title:d.title,description:d.text.slice(0,155),alternates:{canonical:"/declaratii/"+d.slug}};
+ const description=d.text.slice(0,155),path="/declaratii/"+d.slug;
+ return {title:d.title,description,alternates:{canonical:path},openGraph:{type:"article",title:d.title,description,url:path,images:["/images/ChatGPT Image 20 sept. 2026, 20_47_04.webp"]},twitter:{card:"summary_large_image",title:d.title,description,images:["/images/ChatGPT Image 20 sept. 2026, 20_47_04.webp"]}};
 }
 
 export default async function Page({params}:{params:Promise<{slug:string}>}){
@@ -19,12 +21,12 @@ export default async function Page({params}:{params:Promise<{slug:string}>}){
  const d=await getPublishedDeclarationBySlug(slug);
  if(!d)notFound();
  const likes=await countDeclarationLikes(d.slug);
- return <>
+ return <><ArticleStructuredData title={d.title} description={d.text.slice(0,155)} path={`/declaratii/${d.slug}`} datePublished={d.publishedAt||d.createdAt} dateModified={d.updatedAt}/>
   <header><div className="wrap"><nav><Link className="brand logo-link" href="/"><img className="site-logo" src={logo} alt="Cafea în Doi"/></Link><div className="links"><Link href="/">Acasă</Link><Link href="/blog">Gândurile mele</Link><Link href="/declaratii">Declarații</Link><Link href="/intre-noi-doi">Între Noi Doi</Link><Link href="/contact">Contact</Link></div><MobileNav/></nav></div></header>
   <main className="declaration-detail">
    <article className="declaration-letter">
     <div className="declaration-page-shadow-wrap" aria-hidden="true">
-     <Image className="declaration-page-shadow" src="/images/adrian-declaration-shadow.png" width={1024} height={1536} alt="" priority/>
+     <Image className="declaration-page-shadow" src="/images/adrian-declaration-shadow.webp" width={1024} height={1536} alt="" priority/>
     </div>
     <Link className="declaration-back" href="/declaratii">← Toate declarațiile</Link>
     <span className="declaration-category">{d.category}</span>
