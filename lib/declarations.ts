@@ -1,4 +1,5 @@
 import {del,get,list,put} from "@vercel/blob";
+import {initialDeclarations} from "./declaration-seeds";
 
 export type DeclarationStatus="draft"|"published";
 export type DeclarationRecord={
@@ -23,6 +24,7 @@ const read=async(pathname:string)=>{
 };
 
 const pathFor=(status:DeclarationStatus,id:string)=>`${PREFIX}/${status}/${id}.json`;
+const removedPath=(id:string)=>`${PREFIX}/removed/${id}.txt`;
 
 export function declarationSlug(title:string){
  const base=title.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,90);
@@ -32,6 +34,16 @@ export function declarationSlug(title:string){
 export async function listDeclarations(status:DeclarationStatus){
  const {blobs}=await list({prefix:`${PREFIX}/${status}/`,limit:1000});
  const rows=(await Promise.all(blobs.map(b=>read(b.pathname)))).filter(Boolean) as DeclarationRecord[];
+ if(status==="published"){
+  const seeded=await Promise.all(initialDeclarations.map(async seed=>{
+   const [removed,draft]=await Promise.all([
+    get(removedPath(seed.id),{access:"private",useCache:false}),
+    get(pathFor("draft",seed.id),{access:"private",useCache:false})
+   ]);
+   return removed||draft||rows.some(row=>row.id===seed.id)?null:seed;
+  }));
+  rows.push(...seeded.filter((row):row is DeclarationRecord=>row!==null));
+ }
  return rows.sort((a,b)=>new Date(b.publishedAt||b.updatedAt).getTime()-new Date(a.publishedAt||a.updatedAt).getTime());
 }
 
@@ -59,6 +71,8 @@ async function findAny(id:string){
   const rec=await read(pathname);
   if(rec)return {rec,pathname};
  }
+ const seed=initialDeclarations.find(row=>row.id===id);
+ if(seed&&!await get(removedPath(id),{access:"private",useCache:false}))return {rec:seed,pathname:pathFor("published",id)};
  return null;
 }
 
@@ -85,13 +99,18 @@ export async function unpublishDeclaration(id:string){
  const rec:DeclarationRecord={...found.rec,status:"draft",updatedAt:new Date().toISOString()};
  delete rec.publishedAt;
  await put(pathFor("draft",id),JSON.stringify(rec),{access:"private",addRandomSuffix:false,contentType:"application/json"});
- if(found.pathname!==pathFor("draft",id))await del(found.pathname);
+ if(found.pathname!==pathFor("draft",id)&&found.rec!==initialDeclarations.find(row=>row.id===id))await del(found.pathname);
  return rec;
 }
 
 export async function deleteDeclaration(id:string){
  const found=await findAny(id);
- if(found)await del(found.pathname);
+ if(found){try{await del(found.pathname)}catch(e){if(!initialDeclarations.some(row=>row.id===id))throw e}}
+ if(initialDeclarations.some(row=>row.id===id)){
+  await put(removedPath(id),"1",{access:"private",addRandomSuffix:false,contentType:"text/plain"});
+  const other=pathFor(found?.rec.status==="draft"?"published":"draft",id);
+  try{await del(other)}catch{}
+ }
 }
 
 const likePrefix=(slug:string)=>`declaration-likes/${slug}/`;
