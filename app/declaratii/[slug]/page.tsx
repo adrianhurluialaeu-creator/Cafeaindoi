@@ -23,7 +23,7 @@ export default async function Page({params}:{params:Promise<{slug:string}>}){
   <header><div className="wrap"><nav><Link className="brand logo-link" href="/"><img className="site-logo" src={logo} alt="Cafea în Doi"/></Link><div className="links"><Link href="/">Acasă</Link><Link href="/blog">Gândurile mele</Link><Link href="/declaratii">Declarații</Link><Link href="/intre-noi-doi">Între Noi Doi</Link><Link href="/contact">Contact</Link></div><MobileNav/></nav></div></header>
   <main className="declaration-detail">
    <article className="declaration-letter">
-    <Image className="declaration-page-shadow" src="/images/adrian-declaration-shadow.png" width={1371} height={1090} alt="" aria-hidden="true" priority/>
+    <Image className="declaration-page-shadow" src="/images/adrian-declaration-shadow.png" width={1024} height={1536} alt="" aria-hidden="true" priority/>
     <Link className="declaration-back" href="/declaratii">← Toate declarațiile</Link>
     <span className="declaration-category">{d.category}</span>
     <h1>{d.title}</h1>
