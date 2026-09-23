@@ -32,4 +32,4 @@ export default async function Home(){
  </>;
 }
 
-function Footer(){return <footer><div className="wrap footer"><span>© 2026 Cafea în Doi</span><div className="links"><Link href="/termeni">Termeni</Link><Link href="/confidentialitate">Confidențialitate</Link><Link href="/cookies">Cookies</Link><Link href="/contact">Contact</Link></div></div></footer>}
+function Footer(){return <footer><div className="wrap footer"><span>© 2026 Cafea în Doi</span><div className="links"><Link href="/povestea-noastra/login">Povestea noastră</Link><Link href="/termeni">Termeni</Link><Link href="/confidentialitate">Confidențialitate</Link><Link href="/cookies">Cookies</Link><Link href="/contact">Contact</Link></div></div></footer>}
