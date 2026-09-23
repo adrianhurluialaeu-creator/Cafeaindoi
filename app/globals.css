@@ -249,8 +249,9 @@ button.admin-stat{cursor:pointer}.admin-stat.active{border-color:#9d765d;box-sha
 .declarations-empty{background:var(--paper);border:1px dashed var(--line);border-radius:18px;padding:42px;text-align:center}
 .declaration-detail{width:min(860px,90vw);margin:52px auto 70px}
 .declaration-letter{position:relative;isolation:isolate;overflow:hidden;background:var(--paper);border:1px solid var(--line);border-radius:24px;padding:clamp(26px,5vw,54px);box-shadow:0 22px 56px #4b2d1f0e}
-.declaration-letter::before{content:"";position:absolute;z-index:-1;inset:0;background:rgba(255,253,249,.76)}
-.declaration-page-shadow{position:absolute;z-index:-2;width:155%;height:100%;top:0;left:50%;object-fit:fill;object-position:center;transform:translateX(-50%);filter:sepia(1) saturate(.5) contrast(1.12);opacity:.3;mix-blend-mode:multiply}
+.declaration-letter::before{content:"";position:absolute;z-index:-1;inset:0;background:rgba(255,253,249,.83)}
+.declaration-page-shadow-wrap{position:absolute;z-index:-2;inset:0;pointer-events:none}
+.declaration-page-shadow{position:sticky;display:block;top:110px;width:72%;height:auto;max-height:calc(100dvh - 140px);margin:110px auto 0;object-fit:contain;object-position:center;filter:sepia(1) saturate(.52) contrast(1.05);opacity:.54;mix-blend-mode:multiply}
 .declaration-back{display:inline-block;margin-bottom:24px;color:#806453;font-size:12px;font-weight:800;text-decoration:none}
 .declaration-letter h1{font-size:clamp(42px,6vw,68px);margin:13px 0 9px}
 .declaration-date{color:#8b7b72;font-size:12px;margin-bottom:28px}
@@ -298,8 +299,8 @@ button.admin-stat{cursor:pointer}.admin-stat.active{border-color:#9d765d;box-sha
  .declaration-card-public>img{height:210px}
  .declaration-detail{margin-top:28px}
  .declaration-letter{border-radius:18px;padding:24px 20px}
- .declaration-letter::before{background:rgba(255,253,249,.72)}
- .declaration-page-shadow{width:165%;height:100%;top:0;left:50%;object-fit:fill;object-position:center;transform:translateX(-50%);opacity:.28}
+ .declaration-letter::before{background:rgba(255,253,249,.84)}
+ .declaration-page-shadow{top:120px;width:78%;height:auto;max-height:calc(100dvh - 145px);margin-top:120px;object-fit:contain;object-position:center;transform:none;opacity:.58}
  .declaration-text{font-size:18px;line-height:1.75}
  .declaration-actions-bar{gap:7px}.declaration-actions-bar button,.declaration-actions-bar a{flex:1 1 auto;text-align:center}
  .declaration-home{padding-bottom:42px}
