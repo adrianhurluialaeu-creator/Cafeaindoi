@@ -2,7 +2,8 @@ import {createHash,timingSafeEqual} from "crypto";
 import {NextRequest,NextResponse} from "next/server";
 import {availableSlots,getSchedule} from "../../../../lib/schedule";
 import {sendConfirmationEmail} from "../../../../lib/confirmation-email";
-import {deleteInvitation,listInvitations,markConfirmationSent,readInvitation,updateBooking,updateInvitationStatus,type InvitationStatus} from "../../../../lib/invitations";
+import {sendMeetingLocationEmail} from "../../../../lib/meeting-email";
+import {deleteInvitation,listInvitations,markConfirmationSent,readInvitation,updateBooking,updateInvitationStatus,updateJourney,type InvitationStatus,type JourneyStage,type PhysicalMeeting} from "../../../../lib/invitations";
 export const runtime="nodejs";
 export const dynamic="force-dynamic";
 function authorized(req:NextRequest){
@@ -22,7 +23,28 @@ export async function GET(req:NextRequest){
 export async function PATCH(req:NextRequest){
  if(!authorized(req))return NextResponse.json({error:"Unauthorized"},{status:401});
  try{
-  const {id,status,bookingStatus,slotStart,notify}=await req.json();
+  const {id,status,bookingStatus,slotStart,notify,journeyStage,onlineSessions,physicalMeeting,shareLocation}=await req.json();
+  if(journeyStage!==undefined||onlineSessions!==undefined||physicalMeeting!==undefined||shareLocation===true){
+   if(!validId(id))return NextResponse.json({error:"ID invalid."},{status:400});
+   const stages=["invitatie","online","eu_la_ea","ea_la_mine"];
+   if(journeyStage!==undefined&&!stages.includes(journeyStage))return NextResponse.json({error:"Etapă invalidă."},{status:400});
+   if(onlineSessions!==undefined&&(!Number.isInteger(onlineSessions)||onlineSessions<0||onlineSessions>999))return NextResponse.json({error:"Număr de ședințe invalid."},{status:400});
+   let meeting:PhysicalMeeting|undefined;
+   if(physicalMeeting!==undefined){
+    if(!physicalMeeting||!["eu_la_ea","ea_la_mine"].includes(physicalMeeting.direction)||!["propusa","confirmata","finalizata","anulata"].includes(physicalMeeting.status))return NextResponse.json({error:"Datele întâlnirii sunt invalide."},{status:400});
+    const clean=(value:unknown,max:number)=>String(value||"").trim().slice(0,max);
+    meeting={direction:physicalMeeting.direction,status:physicalMeeting.status,city:clean(physicalMeeting.city,120),place:clean(physicalMeeting.place,160)||undefined,address:clean(physicalMeeting.address,240)||undefined,mapUrl:clean(physicalMeeting.mapUrl,500)||undefined,dateTime:clean(physicalMeeting.dateTime,40)||undefined,note:clean(physicalMeeting.note,500)||undefined,locationSharedAt:physicalMeeting.locationSharedAt};
+    if(!meeting.city)return NextResponse.json({error:"Completează orașul întâlnirii."},{status:400});
+    if(meeting.mapUrl&&!/^https:\/\/(maps\.app\.goo\.gl|www\.google\.[^/]+\/maps|maps\.google\.[^/]+)/i.test(meeting.mapUrl))return NextResponse.json({error:"Folosește un link Google Maps valid."},{status:400});
+   }
+   let invitation=await updateJourney(id,{...(journeyStage!==undefined?{journeyStage:journeyStage as JourneyStage}:{}),...(onlineSessions!==undefined?{onlineSessions}:{}),...(meeting?{physicalMeeting:meeting}:{})});
+   if(!invitation)return NextResponse.json({error:"Invitația nu există."},{status:404});
+   if(shareLocation===true){
+    try{await sendMeetingLocationEmail(invitation);invitation=await updateJourney(id,{physicalMeeting:{...invitation.physicalMeeting!,locationSharedAt:new Date().toISOString()}})}
+    catch(error){return NextResponse.json({error:(error as Error).message},{status:409})}
+   }
+   return NextResponse.json({invitation});
+  }
   if(notify===true){
    if(!validId(id))return NextResponse.json({error:"ID invalid."},{status:400});
    const current=(await listInvitations()).find(x=>x.id===id);

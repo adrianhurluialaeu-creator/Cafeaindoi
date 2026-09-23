@@ -1,7 +1,9 @@
 import {del,get,list,put} from "@vercel/blob";
 
 export type InvitationStatus="noua"|"in_conversatie"|"inchisa";
-export type Invitation={id:string;prenume:string;varsta:number;localitate:string;tara:string;whatsapp:string;whatsappOptIn?:boolean;email?:string;despre:string;createdAt:string;status:InvitationStatus;photoType?:string;slotStart?:string;slotDuration?:number;bookingStatus?:"pending"|"confirmed"|"declined";confirmationSentAt?:string;whatsappConfirmationSentAt?:string;whatsappMessageId?:string};
+export type JourneyStage="invitatie"|"online"|"eu_la_ea"|"ea_la_mine";
+export type PhysicalMeeting={direction:"eu_la_ea"|"ea_la_mine";status:"propusa"|"confirmata"|"finalizata"|"anulata";city:string;place?:string;address?:string;mapUrl?:string;dateTime?:string;note?:string;locationSharedAt?:string};
+export type Invitation={id:string;prenume:string;varsta:number;localitate:string;tara:string;whatsapp:string;whatsappOptIn?:boolean;email?:string;despre:string;createdAt:string;status:InvitationStatus;photoType?:string;slotStart?:string;slotDuration?:number;bookingStatus?:"pending"|"confirmed"|"declined";confirmationSentAt?:string;whatsappConfirmationSentAt?:string;whatsappMessageId?:string;journeyStage?:JourneyStage;onlineSessions?:number;physicalMeeting?:PhysicalMeeting};
 const recordPath=(id:string)=>`invitations/${id}.json`;
 const photoPath=(id:string)=>`invitation-photos/${id}`;
 
@@ -33,6 +35,12 @@ export async function updateInvitationStatus(id:string,status:InvitationStatus){
  const record=await readInvitation(id);
  if(!record)return null;
  const updated={...record,status};
+ await put(recordPath(id),JSON.stringify(updated),{access:"private",addRandomSuffix:false,allowOverwrite:true,contentType:"application/json"});
+ return updated;
+}
+export async function updateJourney(id:string,input:{journeyStage?:JourneyStage;onlineSessions?:number;physicalMeeting?:PhysicalMeeting}){
+ const record=await readInvitation(id);if(!record)return null;
+ const updated={...record,...input};
  await put(recordPath(id),JSON.stringify(updated),{access:"private",addRandomSuffix:false,allowOverwrite:true,contentType:"application/json"});
  return updated;
 }
