@@ -7,11 +7,17 @@ const config=()=>{
 
 class MeteredError extends Error{constructor(public status:number,message:string){super(message);this.name="MeteredError"}}
 
+function errorText(value:unknown){
+ if(typeof value==="string")return value;
+ if(value&&typeof value==="object")try{return JSON.stringify(value)}catch{return ""}
+ return value==null?"":String(value);
+}
+
 async function metered(path:string,body:Record<string,unknown>){
  const {domain,secret}=config();
  const response=await fetch(`https://${domain}${path}?secretKey=${encodeURIComponent(secret)}`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body),cache:"no-store",signal:AbortSignal.timeout(10_000)});
  const result=await response.json().catch(()=>({}));
- if(!response.ok){const upstream=String(result?.reason||result?.message||result?.error||"");console.error("[metered] API_ERROR",{path,status:response.status,reason:upstream});if(response.status===401)throw new MeteredError(401,"Cheia Metered nu este validă pentru acest domeniu.");if(response.status===403)throw new MeteredError(403,"Contul Metered nu permite această acțiune.");if(response.status===400)throw new MeteredError(400,upstream||"Metered a respins configurarea camerei video.");throw new MeteredError(response.status,"Serviciul video nu este disponibil momentan.")}
+ if(!response.ok){const upstream=errorText(result?.reason||result?.message||result?.error||result);console.error("[metered] API_ERROR",{path,status:response.status,reason:upstream});if(response.status===401)throw new MeteredError(401,"Cheia Metered nu este validă pentru acest domeniu.");if(response.status===403)throw new MeteredError(403,"Contul Metered nu permite această acțiune.");if(response.status===400)throw new MeteredError(400,upstream||"Metered a respins configurarea camerei video.");throw new MeteredError(response.status,"Serviciul video nu este disponibil momentan.")}
  return result;
 }
 
