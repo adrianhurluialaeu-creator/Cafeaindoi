@@ -18,6 +18,7 @@ import {
   createRoomAccess,
   meetingRoomName,
 } from "../../../../lib/metered";
+import {sendPush} from "../../../../lib/push";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 const valid = (id: string | null) => !!id && /^[0-9a-f-]{36}$/i.test(id);
@@ -63,14 +64,16 @@ export async function POST(req: NextRequest) {
         { error: "ID-ul conversației nu coincide." },
         { status: 409 },
       );
+    const conversation=await sendConversationMessage(
+      row.id,
+      "adrian",
+      String(body.text || ""),
+      body.kind,
+    );
+    try{await sendPush("Mesaj nou de la Adrian",String(body.text||"Ai primit un mesaj nou.").slice(0,120),{url:"/povestea-noastra",tag:`mesaj-${row.id}`,recipient:"partner",invitationId:row.id})}catch(pushError){console.error("[push] PARTNER_MESSAGE_ERROR",pushError)}
     return NextResponse.json({
       conversationId: row.id,
-      conversation: await sendConversationMessage(
-        row.id,
-        "adrian",
-        String(body.text || ""),
-        body.kind,
-      ),
+      conversation,
     });
   } catch (error) {
     return NextResponse.json(
@@ -111,24 +114,30 @@ export async function PATCH(req: NextRequest) {
           String(body.emoji || ""),
         ),
       });
-    if (body.action === "propose")
+    if (body.action === "propose"){
+      const conversation=await proposeCoffeeMeeting(
+        row.id,
+        "adrian",
+        String(body.startsAt || ""),
+        Number(body.plannedMinutes),
+      );
+      try{await sendPush("Adrian a propus o cafea","Deschide Povestea noastră pentru detalii.",{url:"/povestea-noastra",tag:`cafea-${row.id}`,recipient:"partner",invitationId:row.id})}catch(pushError){console.error("[push] PARTNER_MEETING_ERROR",pushError)}
       return NextResponse.json({
         conversationId: row.id,
-        conversation: await proposeCoffeeMeeting(
-          row.id,
-          "adrian",
-          String(body.startsAt || ""),
-          Number(body.plannedMinutes),
-        ),
+        conversation,
       });
-    if (body.action === "respond")
+    }
+    if (body.action === "respond"){
+      const conversation=await respondCoffeeMeeting(
+        row.id,
+        String(body.status || "") as "acceptata" | "refuzata" | "anulata",
+      );
+      try{await sendPush("Răspuns de la Adrian","Adrian a răspuns propunerii de cafea.",{url:"/povestea-noastra",tag:`raspuns-cafea-${row.id}`,recipient:"partner",invitationId:row.id})}catch(pushError){console.error("[push] PARTNER_MEETING_RESPONSE_ERROR",pushError)}
       return NextResponse.json({
         conversationId: row.id,
-        conversation: await respondCoffeeMeeting(
-          row.id,
-          String(body.status || "") as "acceptata" | "refuzata" | "anulata",
-        ),
+        conversation,
       });
+    }
     if (body.action === "join") {
       let conversation = await readConversation(row.id);
       if (!conversation?.meeting || conversation.meeting.status !== "acceptata")
@@ -146,6 +155,7 @@ export async function PATCH(req: NextRequest) {
         conversationId: row.id,
         roomName,
       });
+      try{await sendPush("Adrian a început apelul video","Intră în Povestea noastră pentru a răspunde.",{url:"/povestea-noastra",tag:`apel-${row.id}`,recipient:"partner",invitationId:row.id})}catch(pushError){console.error("[push] PARTNER_VIDEO_ERROR",pushError)}
       return NextResponse.json({
         conversationId: row.id,
         conversation,

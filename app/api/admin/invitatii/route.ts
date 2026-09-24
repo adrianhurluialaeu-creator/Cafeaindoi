@@ -4,6 +4,7 @@ import {availableSlots,getSchedule} from "../../../../lib/schedule";
 import {sendConfirmationEmail} from "../../../../lib/confirmation-email";
 import {sendMeetingLocationEmail} from "../../../../lib/meeting-email";
 import {deleteInvitation,listInvitations,markConfirmationSent,readInvitation,updateBooking,updateInvitationStatus,updateJourney,type Challenge,type InvitationStatus,type JourneyStage,type PhysicalMeeting,type SharedExperience} from "../../../../lib/invitations";
+import {sendPush} from "../../../../lib/push";
 export const runtime="nodejs";
 export const dynamic="force-dynamic";
 export {authorized};
@@ -42,12 +43,19 @@ export async function PATCH(req:NextRequest){
     experience={status:sharedExperience.status,type:clean(sharedExperience.type,120),destination:clean(sharedExperience.destination,160)||undefined,startDate:clean(sharedExperience.startDate,20)||undefined,endDate:clean(sharedExperience.endDate,20)||undefined,budget:clean(sharedExperience.budget,80)||undefined,note:clean(sharedExperience.note,600)||undefined};
     if(!experience.type)return NextResponse.json({error:"Completează tipul experienței."},{status:400});
    }
+   const before=await readInvitation(id);
    let invitation=await updateJourney(id,{...(journeyStage!==undefined?{journeyStage:journeyStage as JourneyStage}:{}),...(onlineSessions!==undefined?{onlineSessions}:{}),...(cleanChallenges?{challenges:cleanChallenges}:{}),...(meeting?{physicalMeeting:meeting}:{}),...(experience?{sharedExperience:experience}:{})});
    if(!invitation)return NextResponse.json({error:"Invitația nu există."},{status:404});
    if(shareLocation===true){
     try{await sendMeetingLocationEmail(invitation);invitation=await updateJourney(id,{physicalMeeting:{...invitation.physicalMeeting!,locationSharedAt:new Date().toISOString()}})}
     catch(error){return NextResponse.json({error:(error as Error).message},{status:409})}
    }
+   try{
+    const previousIds=new Set((before?.challenges||[]).map(item=>item.id)),newChallenge=cleanChallenges?.find(item=>item.proposer==="adrian"&&!previousIds.has(item.id));
+    if(newChallenge)await sendPush("O provocare nouă de la Adrian",newChallenge.title,{url:"/povestea-noastra",tag:`provocare-${newChallenge.id}`,recipient:"partner",invitationId:id});
+    else if(meeting)await sendPush("Întâlnirea voastră a fost actualizată",`${meeting.city}${meeting.dateTime?" · verifică data și ora":""}`,{url:"/povestea-noastra",tag:`intalnire-${id}`,recipient:"partner",invitationId:id});
+    else if(experience)await sendPush("Experiența voastră a fost actualizată",experience.type,{url:"/povestea-noastra",tag:`experienta-${id}`,recipient:"partner",invitationId:id});
+   }catch(pushError){console.error("[push] PARTNER_JOURNEY_ERROR",pushError)}
    return NextResponse.json({invitation});
   }
   if(notify===true){

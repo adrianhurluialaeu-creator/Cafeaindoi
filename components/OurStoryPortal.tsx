@@ -3,6 +3,7 @@ import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import type { Challenge, Invitation, JourneyStage } from "../lib/invitations";
 import ConversationPanel from "./ConversationPanel";
+import PartnerPushSettings from "./PartnerPushSettings";
 const stages: JourneyStage[] = [
   "invitatie",
   "online",
@@ -78,6 +79,7 @@ export default function OurStoryPortal({ initial }: { initial: Invitation }) {
           </li>
         ))}
       </ol>
+      <PartnerPushSettings />
       <ConversationPanel role="ea" invitationId={row.id} partnerName="Adrian" />
       <section className="portal-card">
         <div className="portal-card-head">
