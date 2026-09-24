@@ -59,10 +59,10 @@ Vizitatoarea trebuie să îl cunoască pe Adrian în ritmul ei, să găsească r
 
 - [x] Persistența profilului de compatibilitate în `app_settings`.
 - [x] Migrarea convenției Next.js 16 de la `middleware.ts` la `proxy.ts`.
-- [ ] Canale Supabase Realtime private, autorizate per conversație.
+- [x] Flux Supabase Realtime autorizat pe server per conversație, transmis browserului prin SSE protejat de sesiune.
 - [x] Ștergere fizică a mesajelor expirate verificată automat în fiecare oră prin Supabase Cron.
-- [ ] Validare/allowlist și servire sigură pentru imaginile externe ale declarațiilor.
-- [ ] Sanitizarea conținutului HTML primit prin webhook-ul Resend.
+- [x] Validare/allowlist pentru imaginile declarațiilor: doar HTTPS pe domeniul propriu.
+- [x] Sanitizarea conținutului HTML primit prin webhook-ul Resend și protecție anti-replay de 5 minute.
 - [ ] CSP fără `unsafe-inline`, cu nonce-uri generate per răspuns.
 
 ### Calitate și operare

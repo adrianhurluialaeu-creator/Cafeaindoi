@@ -5,6 +5,16 @@ import {createDeclaration,deleteDeclaration,listDeclarations,publishDeclaration,
 export const runtime="nodejs";
 export const dynamic="force-dynamic";
 
+function declarationImage(value:unknown){
+ const imageUrl=String(value||"").trim().slice(0,1000);
+ if(!imageUrl)return "";
+ try{
+  const url=new URL(imageUrl);
+  if(url.protocol!=="https:"||!["cafeaindoi.eu","www.cafeaindoi.eu"].includes(url.hostname.toLowerCase()))return null;
+  return url.toString();
+ }catch{return null}
+}
+
 export async function GET(req:NextRequest){
  if(!authorized(req))return NextResponse.json({error:"Unauthorized"},{status:401});
  try{
@@ -20,10 +30,10 @@ export async function POST(req:NextRequest){
   const title=String(b.title||"").trim().slice(0,180);
   const text=String(b.text||"").trim().slice(0,12000);
   const category=String(b.category||"Dragoste").trim().slice(0,60);
-  const imageUrl=String(b.imageUrl||"").trim().slice(0,1000);
+  const imageUrl=declarationImage(b.imageUrl);
   const publish=b.publish===true;
   if(title.length<3||text.length<10)return NextResponse.json({error:"Titlul și textul sunt obligatorii."},{status:400});
-  if(imageUrl&&!/^https:\/\//i.test(imageUrl))return NextResponse.json({error:"Imaginea trebuie să aibă un URL HTTPS."},{status:400});
+  if(imageUrl===null)return NextResponse.json({error:"Imaginea trebuie găzduită pe cafeaindoi.eu și să folosească HTTPS."},{status:400});
   const declaration=await createDeclaration({title,text,category,imageUrl:imageUrl||undefined,status:publish?"published":"draft"});
   return NextResponse.json({ok:true,declaration});
  }catch(e){console.error("[admin/declaratii] POST_ERROR",e);return NextResponse.json({error:"Declarația nu a putut fi creată."},{status:500})}
@@ -44,8 +54,8 @@ export async function PATCH(req:NextRequest){
    if(typeof b.text==="string")input.text=b.text.trim().slice(0,12000);
    if(typeof b.category==="string")input.category=b.category.trim().slice(0,60);
    if(typeof b.imageUrl==="string"){
-    const imageUrl=b.imageUrl.trim().slice(0,1000);
-    if(imageUrl&&!/^https:\/\//i.test(imageUrl))return NextResponse.json({error:"Imaginea trebuie să aibă un URL HTTPS."},{status:400});
+    const imageUrl=declarationImage(b.imageUrl);
+    if(imageUrl===null)return NextResponse.json({error:"Imaginea trebuie găzduită pe cafeaindoi.eu și să folosească HTTPS."},{status:400});
     input.imageUrl=imageUrl||undefined;
    }
    if(input.title!==undefined&&input.title.length<3)return NextResponse.json({error:"Titlul este prea scurt."},{status:400});
