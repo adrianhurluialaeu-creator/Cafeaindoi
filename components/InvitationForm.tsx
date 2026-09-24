@@ -15,14 +15,14 @@ export default function InvitationForm(){
  useEffect(()=>{fetch("/api/program",{cache:"no-store"}).then(async r=>{if(!r.ok)throw Error();return r.json()}).then(x=>{setSlots(x.slots);setEnabled(x.enabled)}).catch(()=>setError("Programul nu poate fi încărcat. Reîncarcă pagina.")).finally(()=>setLoadingSlots(false))},[]);
  function validate(ids:string[]){for(const id of ids){const field=document.getElementById(id) as HTMLInputElement|HTMLTextAreaElement|null;if(field&&!field.reportValidity())return false}return true}
  function nextFromAbout(){if(!validate(["invite-prenume","invite-varsta","invite-localitate","invite-tara","invite-despre"]))return;setError("");setStep(2);requestAnimationFrame(()=>document.getElementById("invite-email")?.focus())}
- function nextFromContact(){if(!validate(["invite-email","invite-whatsapp"]))return;if(enabled&&!selectedSlot){setError("Alege ziua și ora cafelei.");return}setError("");setStep(3)}
+ function nextFromContact(){if(!validate(["invite-email"]))return;if(enabled&&!selectedSlot){setError("Alege ziua și ora cafelei.");return}setError("");setStep(3)}
  async function submit(e:FormEvent<HTMLFormElement>){
   e.preventDefault();if(step===1){nextFromAbout();return}if(step===2){nextFromContact();return}setState("sending");setError("");
   if(!media){setError("Pentru verificarea live, fă un selfie sau un video de maximum 5 secunde.");setState("error");return}
   const form=e.currentTarget,d=new FormData(form);if(enabled)d.set("slotStart",selectedSlot);d.set("photo",media);
   try{const r=await fetch("/api/invitatie",{method:"POST",body:d}),x=await r.json();if(!r.ok)throw new Error(x.error||"Trimiterea a eșuat.");reportConversion();form.reset();setState("sent")}catch(err){setError(err instanceof Error?err.message:"Trimiterea a eșuat.");setState("error")}
  }
- if(state==="sent")return <div className="success" role="status"><b>☕ {enabled?"Am primit propunerea ta pentru o cafea în doi.":"Invitația a fost trimisă."}</b><p>{enabled?"Îți confirm personal ziua și ora dacă putem bea cafeaua împreună.":"Mulțumesc că mi-ai scris. Dacă există interes reciproc, continuăm pe WhatsApp."}</p></div>;
+ if(state==="sent")return <div className="success" role="status"><b>☕ {enabled?"Am primit propunerea ta pentru o cafea în doi.":"Invitația a fost trimisă."}</b><p>{enabled?"Îți confirm personal ziua și ora dacă putem bea cafeaua împreună.":"Mulțumesc că mi-ai scris. Dacă există interes reciproc, continuăm în spațiul nostru privat."}</p></div>;
  return <form ref={formRef} onSubmit={submit} encType="multipart/form-data" className="invite-form">
   <div className="invite-steps three" aria-label="Progres formular"><span className={step===1?"active":"done"}><b>{step===1?"1":"✓"}</b> Despre tine</span><i/><span className={step===2?"active":step>2?"done":""}><b>{step>2?"✓":"2"}</b> Contact</span><i/><span className={step===3?"active":""}><b>3</b> Prezentare</span></div>
   <section className={step===1?"invite-step active":"invite-step"} aria-hidden={step!==1}>
@@ -35,7 +35,6 @@ export default function InvitationForm(){
   <section className={step===2?"invite-step active":"invite-step"} aria-hidden={step!==2}>
    <h3>Contact și cafea</h3><p>Datele rămân private și sunt folosite numai pentru această invitație.</p>
    <label htmlFor="invite-email">Email *</label><input id="invite-email" name="email" type="email" autoComplete="email" maxLength={254} required tabIndex={step===2?0:-1}/>
-   <label htmlFor="invite-whatsapp">Număr WhatsApp *</label><input id="invite-whatsapp" name="whatsapp" type="tel" inputMode="tel" autoComplete="tel" placeholder="+40 7xx xxx xxx" pattern="^[+0-9][0-9 ()-]{6,24}$" maxLength={25} required tabIndex={step===2?0:-1}/>
    <div className="coffee-slots">{loadingSlots?<p>Se încarcă programul…</p>:enabled?slots.length?<CoffeeBookingPicker slots={slots} value={selectedSlot} onChange={setSelectedSlot}/>:<p>Nu există intervale libere în următoarele 14 zile.</p>:<p>Programările nu sunt deschise momentan. Poți trimite o invitație fără oră propusă.</p>}</div>
    {error&&<div className="formerror" role="alert">{error}</div>}
    <div className="invite-actions"><button type="button" className="btn alt" onClick={()=>setStep(1)}>← Înapoi</button><button type="button" className="btn" disabled={loadingSlots||enabled&&!slots.length} onClick={nextFromContact}>Continuă →</button></div>
@@ -45,7 +44,6 @@ export default function InvitationForm(){
    <LiveMediaCapture onChange={setMedia}/>
    <div aria-hidden="true" style={{position:"absolute",left:"-10000px",width:1,height:1,overflow:"hidden"}}><label htmlFor="invite-website">Website</label><input id="invite-website" name="website" tabIndex={-1} autoComplete="off"/></div>
    <label className="check"><input name="ageOk" type="checkbox" required tabIndex={step===3?0:-1}/>Confirm că am cel puțin 18 ani.</label>
-   <label className="check"><input name="whatsappOptIn" type="checkbox" tabIndex={step===3?0:-1}/>Doresc să primesc confirmarea întâlnirii și pe WhatsApp la numărul introdus.</label>
    <label className="check"><input name="privacyOk" type="checkbox" required tabIndex={step===3?0:-1}/>Sunt de acord cu prelucrarea datelor și a selfie-ului sau videoului de verificare live, conform <Link href="/confidentialitate">Politicii de confidențialitate</Link>.</label>
    {state==="error"&&<div className="formerror" role="alert">{error}</div>}
    <div className="invite-actions"><button type="button" className="btn alt" onClick={()=>setStep(2)}>← Înapoi</button><button disabled={state==="sending"||!media} className="btn">{state==="sending"?"Se trimite…":enabled?"☕ Propune cafeaua":"☕ Trimite invitația"}</button></div>
