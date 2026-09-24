@@ -1,5 +1,5 @@
-import {del,get,list,put} from "@vercel/blob";
 import {deleteConversation} from "./conversation";
+import {createSupabaseAdmin} from "./supabase";
 
 export type InvitationStatus="noua"|"in_conversatie"|"inchisa";
 export type JourneyStage="invitatie"|"online"|"eu_la_ea"|"ea_la_mine"|"experienta";
@@ -7,77 +7,87 @@ export type Challenge={id:string;proposer:"adrian"|"ea";title:string;description
 export type PhysicalMeeting={direction:"eu_la_ea"|"ea_la_mine";status:"propusa"|"confirmata"|"finalizata"|"anulata";city:string;place?:string;address?:string;mapUrl?:string;dateTime?:string;note?:string;locationSharedAt?:string};
 export type SharedExperience={status:"propusa"|"acceptata"|"planificata"|"finalizata"|"anulata";type:string;destination?:string;startDate?:string;endDate?:string;budget?:string;note?:string};
 export type Invitation={id:string;prenume:string;varsta:number;localitate:string;tara:string;whatsapp:string;whatsappOptIn?:boolean;email?:string;despre:string;createdAt:string;status:InvitationStatus;photoType?:string;slotStart?:string;slotDuration?:number;bookingStatus?:"pending"|"confirmed"|"declined";confirmationSentAt?:string;whatsappConfirmationSentAt?:string;whatsappMessageId?:string;journeyStage?:JourneyStage;onlineSessions?:number;challenges?:Challenge[];physicalMeeting?:PhysicalMeeting;sharedExperience?:SharedExperience;portalAccessStatus?:"invited"|"active"|"disabled";portalInvitedAt?:string};
-const recordPath=(id:string)=>`invitations/${id}.json`;
-const photoPath=(id:string)=>`invitation-photos/${id}`;
+const BUCKET="invitation-photos";
+const photoPath=(id:string)=>id;
+
+async function writeInvitation(record:Invitation){
+ const {error}=await createSupabaseAdmin().from("invitations").upsert({id:record.id,record,created_at:record.createdAt,updated_at:new Date().toISOString()});
+ if(error)throw error;
+}
 
 export async function saveInvitation(input:Omit<Invitation,"id"|"createdAt"|"status">,photo?:File){
  const id=crypto.randomUUID();
  const record:Invitation={...input,id,createdAt:new Date().toISOString(),status:"noua"};
- if(photo)await put(photoPath(id),Buffer.from(await photo.arrayBuffer()),{access:"private",addRandomSuffix:false,contentType:photo.type});
- try{await put(recordPath(id),JSON.stringify(record),{access:"private",addRandomSuffix:false,contentType:"application/json"})}
- catch(error){if(photo)await del(photoPath(id));throw error}
+ const db=createSupabaseAdmin();
+ if(photo){const {error}=await db.storage.from(BUCKET).upload(photoPath(id),Buffer.from(await photo.arrayBuffer()),{contentType:photo.type,upsert:true});if(error)throw error}
+ try{await writeInvitation(record)}
+ catch(error){if(photo)await db.storage.from(BUCKET).remove([photoPath(id)]);throw error}
  return record;
 }
 export async function readInvitation(id:string){
- const result=await get(recordPath(id),{access:"private",useCache:false});
- if(!result||result.statusCode!==200)return null;
- return JSON.parse(await new Response(result.stream).text()) as Invitation;
+ const {data,error}=await createSupabaseAdmin().from("invitations").select("record").eq("id",id).maybeSingle();
+ if(error)throw error;
+ return data?.record as Invitation|null;
 }
 export async function listInvitations(){
+ const db=createSupabaseAdmin();
+ const {data,error}=await db.from("invitations").select("record").order("created_at",{ascending:false}).limit(1000);
+ if(error)throw error;
  const rows:Invitation[]=[];
- let cursor:string|undefined;
- do{
-  const page=await list({prefix:"invitations/",limit:1000,cursor});
-  const records=await Promise.all(page.blobs.map(b=>readInvitation(b.pathname.split("/").pop()!.replace(/\.json$/,""))));
-  for(const record of records.filter((r):r is Invitation=>r!==null)){
-   const expired=Date.now()-Date.parse(record.createdAt)>90*864e5;
-   if(expired&&record.status!=="in_conversatie"&&record.portalAccessStatus!=="active"){
-    try{await del(record.photoType?[recordPath(record.id),photoPath(record.id)]:recordPath(record.id))}catch(error){console.error("[invitations] RETENTION_CLEANUP_ERROR",error)}
-   }else rows.push(record);
-  }
-  cursor=page.hasMore?page.cursor:undefined;
- }while(cursor);
+ for(const record of (data||[]).map(row=>row.record as Invitation)){
+  const expired=Date.now()-Date.parse(record.createdAt)>90*864e5;
+  if(expired&&record.status!=="in_conversatie"&&record.portalAccessStatus!=="active"){
+   try{await deleteInvitation(record.id)}catch(error){console.error("[invitations] RETENTION_CLEANUP_ERROR",error)}
+  }else rows.push(record);
+ }
  return rows.sort((a,b)=>b.createdAt.localeCompare(a.createdAt));
 }
 export async function updateInvitationStatus(id:string,status:InvitationStatus){
  const record=await readInvitation(id);
  if(!record)return null;
  const updated={...record,status};
- await put(recordPath(id),JSON.stringify(updated),{access:"private",addRandomSuffix:false,allowOverwrite:true,contentType:"application/json"});
+ await writeInvitation(updated);
  return updated;
 }
 export async function updateJourney(id:string,input:{journeyStage?:JourneyStage;onlineSessions?:number;challenges?:Challenge[];physicalMeeting?:PhysicalMeeting;sharedExperience?:SharedExperience}){
  const record=await readInvitation(id);if(!record)return null;
  const updated={...record,...input};
- await put(recordPath(id),JSON.stringify(updated),{access:"private",addRandomSuffix:false,allowOverwrite:true,contentType:"application/json"});
+ await writeInvitation(updated);
  return updated;
 }
 export async function updatePortalAccess(id:string,portalAccessStatus:Invitation["portalAccessStatus"]){
  const record=await readInvitation(id);if(!record)return null;
  const updated={...record,portalAccessStatus,portalInvitedAt:portalAccessStatus==="invited"?new Date().toISOString():record.portalInvitedAt};
- await put(recordPath(id),JSON.stringify(updated),{access:"private",addRandomSuffix:false,allowOverwrite:true,contentType:"application/json"});
+ await writeInvitation(updated);
  return updated;
 }
 export async function updateBooking(id:string,bookingStatus:"pending"|"confirmed"|"declined",slotStart?:string,slotDuration?:number){
  const record=await readInvitation(id);if(!record)return null;
  const updated={...record,bookingStatus,slotStart:slotStart||record.slotStart,slotDuration:slotDuration||record.slotDuration,confirmationSentAt:bookingStatus==="confirmed"&&record.bookingStatus==="confirmed"&&(!slotStart||slotStart===record.slotStart)?record.confirmationSentAt:undefined,whatsappConfirmationSentAt:bookingStatus==="confirmed"&&record.bookingStatus==="confirmed"&&(!slotStart||slotStart===record.slotStart)?record.whatsappConfirmationSentAt:undefined,whatsappMessageId:bookingStatus==="confirmed"&&record.bookingStatus==="confirmed"&&(!slotStart||slotStart===record.slotStart)?record.whatsappMessageId:undefined};
- await put(recordPath(id),JSON.stringify(updated),{access:"private",addRandomSuffix:false,allowOverwrite:true,contentType:"application/json"});
+ await writeInvitation(updated);
  return updated;
 }
 export async function markConfirmationSent(id:string){
  const record=await readInvitation(id);if(!record)return null;
  const updated={...record,confirmationSentAt:new Date().toISOString()};
- await put(recordPath(id),JSON.stringify(updated),{access:"private",addRandomSuffix:false,allowOverwrite:true,contentType:"application/json"});return updated;
+ await writeInvitation(updated);return updated;
 }
 export async function markWhatsAppSent(id:string,messageId:string){
  const record=await readInvitation(id);if(!record)return null;
  const updated={...record,whatsappConfirmationSentAt:new Date().toISOString(),whatsappMessageId:messageId};
- await put(recordPath(id),JSON.stringify(updated),{access:"private",addRandomSuffix:false,allowOverwrite:true,contentType:"application/json"});return updated;
+ await writeInvitation(updated);return updated;
 }
 export async function deleteInvitation(id:string){
  const record=await readInvitation(id);
  if(!record)return false;
- await Promise.all([del(record.photoType?[recordPath(id),photoPath(id)]:recordPath(id)),deleteConversation(id)]);
+ const db=createSupabaseAdmin();
+ if(record.photoType)await db.storage.from(BUCKET).remove([photoPath(id)]);
+ const {error}=await db.from("invitations").delete().eq("id",id);if(error)throw error;
+ await deleteConversation(id);
  return true;
 }
-export async function readInvitationPhoto(id:string){return get(photoPath(id),{access:"private",useCache:false})}
+export async function readInvitationPhoto(id:string){
+ const {data,error}=await createSupabaseAdmin().storage.from(BUCKET).download(photoPath(id));
+ if(error||!data)return null;
+ return {statusCode:200,stream:data.stream()};
+}
