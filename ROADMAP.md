@@ -63,13 +63,14 @@ Vizitatoarea trebuie să îl cunoască pe Adrian în ritmul ei, să găsească r
 - [x] Ștergere fizică a mesajelor expirate verificată automat în fiecare oră prin Supabase Cron.
 - [x] Validare/allowlist pentru imaginile declarațiilor: doar HTTPS pe domeniul propriu.
 - [x] Sanitizarea conținutului HTML primit prin webhook-ul Resend și protecție anti-replay de 5 minute.
-- [ ] CSP fără `unsafe-inline`, cu nonce-uri generate per răspuns.
+- [ ] CSP fără `unsafe-inline`; necesită refactorizarea scripturilor/stilurilor fără nonce global, pentru a păstra paginile SEO statice.
 
 ### Calitate și operare
 
 - [x] Versiuni exacte pentru dependențele directe și lockfile păstrat.
-- [ ] Teste automate pentru autentificare, invitații, portal, conversații și retenție.
-- [ ] ESLint și verificări CI obligatorii înainte de deploy.
+- [ ] Teste automate pentru autentificare, invitații, portal, conversații și retenție. (autentificare, portal, securitate webhook și acces Realtime acoperite)
+- [x] ESLint, typecheck, teste și build verificate automat prin CI înainte de deploy.
+- [ ] Eliminarea excepțiilor ESLint istorice: efecte React sincrone, tipuri `any`, linkuri și imagini vechi.
 - [ ] Înlocuirea elementelor `<img>` rămase cu `next/image` unde este potrivit.
 - [ ] Activarea și verificarea observabilității Vercel pentru erorile runtime.
 
