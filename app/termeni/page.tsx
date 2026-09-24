@@ -13,8 +13,8 @@ export default function Page(){return <><header><div className="wrap"><nav><Link
 <p>Te rugăm să furnizezi numai informații despre tine, corecte și relevante pentru invitație. Nu introduce date despre alte persoane fără dreptul de a face acest lucru și nu transmite parole, date financiare, documente de identitate, informații medicale sau alte date sensibile.</p>
 <h2>5. Utilizare interzisă</h2>
 <p>Nu este permisă folosirea formularului pentru hărțuire, amenințări, fraudă, spam, conținut ilegal, impersonarea altei persoane sau transmiterea de cod ori linkuri malițioase. Mesajele abuzive pot fi ignorate, șterse sau, când legea o impune, puse la dispoziția autorităților competente.</p>
-<h2>6. WhatsApp și servicii externe</h2>
-<p>Dacă există interes reciproc, conversația poate continua prin WhatsApp. WhatsApp este un serviciu extern, cu propriile condiții și practici de confidențialitate; Cafea în Doi nu controlează funcționarea acestui serviciu.</p>
+<h2>6. Spațiul privat</h2>
+<p>Dacă există interes reciproc, conversația poate continua în spațiul privat Cafea în Doi. Accesul este oferit numai persoanei invitate și poate fi retras dacă interacțiunea se încheie.</p>
 <h2>7. Disponibilitatea site-ului</h2>
 <p>Site-ul este oferit ca pagină personală și poate fi modificat, suspendat sau închis. Nu se garantează disponibilitatea neîntreruptă ori lipsa erorilor tehnice.</p>
 <h2>8. Date personale</h2>

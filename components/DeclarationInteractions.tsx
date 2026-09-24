@@ -52,7 +52,6 @@ export default function DeclarationInteractions({slug,title,initialLikes}:{slug:
   <section className="declaration-actions-bar">
    <button className={"declaration-like "+(liked?"liked":"")} onClick={toggleLike}>{liked?"♥":"♡"} <strong>{likes}</strong> <span>{liked?"Îți place":"Îmi place"}</span></button>
    <button onClick={shareNative}>↗ Distribuie</button>
-   <a href={"https://wa.me/?text="+encodeURIComponent(title+" "+absolute)} target="_blank" rel="noreferrer">WhatsApp</a>
    <a href={"https://www.facebook.com/sharer/sharer.php?u="+encodeURIComponent(absolute)} target="_blank" rel="noreferrer">Facebook</a>
   </section>
 
