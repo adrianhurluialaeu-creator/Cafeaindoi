@@ -19,9 +19,10 @@ export default function GoogleAdsConsent(){
   if(v==="granted"||v==="denied") update(v==="granted");
  },[]);
  function choose(v:"granted"|"denied"){
-  localStorage.setItem(KEY,v);
+ localStorage.setItem(KEY,v);
   setChoice(v);
   update(v==="granted");
+  window.dispatchEvent(new Event("cafeaindoi-consent"));
  }
  return <>
   <Script id="google-consent-default" strategy="beforeInteractive">{`window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments)}window.gtag=gtag;gtag('consent','default',{ad_storage:'denied',ad_user_data:'denied',ad_personalization:'denied',analytics_storage:'denied',wait_for_update:2000});`}</Script>

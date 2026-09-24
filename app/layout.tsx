@@ -2,6 +2,7 @@ import "./globals.css";
 import type {Metadata} from "next";
 import {Allura,Cormorant_Garamond,Libre_Baskerville} from "next/font/google";
 import GoogleAdsConsent from "../components/GoogleAdsConsent";
+import AnalyticsTracker from "../components/AnalyticsTracker";
 import {PersonStructuredData,WebsiteStructuredData} from "../components/StructuredData";
 
 const declarationTitle=Cormorant_Garamond({subsets:["latin"],weight:["400","500","600"],style:["normal","italic"],display:"swap",variable:"--font-declaration-title"});
@@ -19,5 +20,5 @@ twitter:{card:"summary_large_image",title:"Cafea în Doi",description:"Prima caf
 };
 
 export default function RootLayout({children}:{children:React.ReactNode}){
- return <html lang="ro" className={`${declarationTitle.variable} ${declarationBody.variable} ${declarationSignature.variable}`}><body><PersonStructuredData/><WebsiteStructuredData/>{children}<GoogleAdsConsent/></body></html>
+ return <html lang="ro" className={`${declarationTitle.variable} ${declarationBody.variable} ${declarationSignature.variable}`}><body><PersonStructuredData/><WebsiteStructuredData/><AnalyticsTracker/>{children}<GoogleAdsConsent/></body></html>
 }
