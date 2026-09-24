@@ -31,7 +31,7 @@ export async function createPrivateRoom(roomName:string){
 
 export async function createRoomAccess(roomName:string,name:string,isAdmin:boolean){
  const {domain}=config();
- const token=await metered("/api/v1/token",{roomName,name:name.slice(0,80),isAdmin,globalToken:false,expireUnixSec:Math.floor(Date.now()/1000)+2*60*60});
+ const token=await metered("/api/v1/token",{roomName,name:name.slice(0,80),isAdmin,expireUnixSec:Math.floor(Date.now()/1000)+2*60*60});
  const accessToken=token?.token||token?.accessToken;
  if(!accessToken)throw new Error("Accesul la apel nu a putut fi creat.");
  return {roomURL:`${domain}/${roomName}`,accessToken:String(accessToken)};
