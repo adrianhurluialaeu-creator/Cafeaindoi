@@ -1,132 +1,18 @@
-import {del,get,list,put} from "@vercel/blob";
 import {initialDeclarations} from "./declaration-seeds";
-
+import {createSupabaseAdmin} from "./supabase";
 export type DeclarationStatus="draft"|"published";
-export type DeclarationRecord={
- id:string;
- slug:string;
- title:string;
- text:string;
- category:string;
- imageUrl?:string;
- createdAt:string;
- updatedAt:string;
- publishedAt?:string;
- status:DeclarationStatus;
-};
-
-const PREFIX="declarations";
-
-const read=async(pathname:string)=>{
- const r=await get(pathname,{access:"private",useCache:false});
- if(!r||r.statusCode!==200)return null;
- return JSON.parse(await new Response(r.stream).text()) as DeclarationRecord;
-};
-
-const pathFor=(status:DeclarationStatus,id:string)=>`${PREFIX}/${status}/${id}.json`;
-const removedPath=(id:string)=>`${PREFIX}/removed/${id}.txt`;
-
-export function declarationSlug(title:string){
- const base=title.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,90);
- return base||"declaratie";
-}
-
-export async function listDeclarations(status:DeclarationStatus){
- const {blobs}=await list({prefix:`${PREFIX}/${status}/`,limit:1000});
- const rows=(await Promise.all(blobs.map(b=>read(b.pathname)))).filter(Boolean) as DeclarationRecord[];
- if(status==="published"){
-  const seeded=await Promise.all(initialDeclarations.map(async seed=>{
-   const [removed,draft]=await Promise.all([
-    get(removedPath(seed.id),{access:"private",useCache:false}),
-    get(pathFor("draft",seed.id),{access:"private",useCache:false})
-   ]);
-   return removed||draft||rows.some(row=>row.id===seed.id)?null:seed;
-  }));
-  rows.push(...seeded.filter((row):row is DeclarationRecord=>row!==null));
- }
- return rows.sort((a,b)=>new Date(b.publishedAt||b.updatedAt).getTime()-new Date(a.publishedAt||a.updatedAt).getTime());
-}
-
-export async function getPublishedDeclarationBySlug(slug:string){
- const rows=await listDeclarations("published");
- return rows.find(x=>x.slug===slug)||null;
-}
-
-export async function createDeclaration(input:{title:string;text:string;category:string;imageUrl?:string;status?:DeclarationStatus}){
- const now=new Date().toISOString();
- const existing=[...(await listDeclarations("draft")),...(await listDeclarations("published"))];
- const root=declarationSlug(input.title);
- let slug=root,n=2;
- while(existing.some(x=>x.slug===slug)){slug=`${root}-${n++}`}
- const status=input.status||"draft";
- const rec:DeclarationRecord={id:crypto.randomUUID(),slug,title:input.title,text:input.text,category:input.category,imageUrl:input.imageUrl||undefined,createdAt:now,updatedAt:now,status};
- if(status==="published")rec.publishedAt=now;
- await put(pathFor(status,rec.id),JSON.stringify(rec),{access:"private",addRandomSuffix:false,contentType:"application/json"});
- return rec;
-}
-
-async function findAny(id:string){
- for(const status of ["draft","published"] as const){
-  const pathname=pathFor(status,id);
-  const rec=await read(pathname);
-  if(rec)return {rec,pathname};
- }
- const seed=initialDeclarations.find(row=>row.id===id);
- if(seed&&!await get(removedPath(id),{access:"private",useCache:false}))return {rec:seed,pathname:pathFor("published",id)};
- return null;
-}
-
-export async function updateDeclaration(id:string,input:Partial<Pick<DeclarationRecord,"title"|"text"|"category"|"imageUrl">>){
- const found=await findAny(id);
- if(!found)throw new Error("Declarația nu a fost găsită.");
- const rec={...found.rec,...input,updatedAt:new Date().toISOString()};
- await put(found.pathname,JSON.stringify(rec),{access:"private",addRandomSuffix:false,contentType:"application/json"});
- return rec;
-}
-
-export async function publishDeclaration(id:string){
- const found=await findAny(id);
- if(!found)throw new Error("Declarația nu a fost găsită.");
- const rec:DeclarationRecord={...found.rec,status:"published",updatedAt:new Date().toISOString(),publishedAt:found.rec.publishedAt||new Date().toISOString()};
- await put(pathFor("published",id),JSON.stringify(rec),{access:"private",addRandomSuffix:false,contentType:"application/json"});
- if(found.pathname!==pathFor("published",id))await del(found.pathname);
- return rec;
-}
-
-export async function unpublishDeclaration(id:string){
- const found=await findAny(id);
- if(!found)throw new Error("Declarația nu a fost găsită.");
- const rec:DeclarationRecord={...found.rec,status:"draft",updatedAt:new Date().toISOString()};
- delete rec.publishedAt;
- await put(pathFor("draft",id),JSON.stringify(rec),{access:"private",addRandomSuffix:false,contentType:"application/json"});
- if(found.pathname!==pathFor("draft",id)&&found.rec!==initialDeclarations.find(row=>row.id===id))await del(found.pathname);
- return rec;
-}
-
-export async function deleteDeclaration(id:string){
- const found=await findAny(id);
- if(found){try{await del(found.pathname)}catch(e){if(!initialDeclarations.some(row=>row.id===id))throw e}}
- if(initialDeclarations.some(row=>row.id===id)){
-  await put(removedPath(id),"1",{access:"private",addRandomSuffix:false,contentType:"text/plain"});
-  const other=pathFor(found?.rec.status==="draft"?"published":"draft",id);
-  try{await del(other)}catch{}
- }
-}
-
-const likePrefix=(slug:string)=>`declaration-likes/${slug}/`;
-const likePath=(slug:string,visitorId:string)=>`${likePrefix(slug)}${visitorId}.txt`;
-
-export async function countDeclarationLikes(slug:string){
- const {blobs}=await list({prefix:likePrefix(slug),limit:1000});
- return blobs.length;
-}
-
-export async function setDeclarationLike(slug:string,visitorId:string,liked:boolean){
- const pathname=likePath(slug,visitorId);
- if(liked){
-  await put(pathname,"1",{access:"private",addRandomSuffix:false,contentType:"text/plain"});
- }else{
-  try{await del(pathname)}catch{}
- }
- return countDeclarationLikes(slug);
-}
+export type DeclarationRecord={id:string;slug:string;title:string;text:string;category:string;imageUrl?:string;createdAt:string;updatedAt:string;publishedAt?:string;status:DeclarationStatus};
+const KIND="declaration";
+export function declarationSlug(title:string){const base=title.normalize("NFD").replace(/[\u0300-\u036f]/g,"").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,90);return base||"declaratie"}
+async function stored(status?:string){let query=createSupabaseAdmin().from("content_records").select("id,status,record").eq("kind",KIND);if(status)query=query.eq("status",status);const {data,error}=await query.order("updated_at",{ascending:false}).limit(1000);if(error)throw error;return data||[]}
+export async function listDeclarations(status:DeclarationStatus){const rows=(await stored(status)).map(x=>x.record as DeclarationRecord);if(status==="published"){const all=await stored();for(const seed of initialDeclarations)if(!all.some(x=>x.id===seed.id))rows.push(seed)}return rows.sort((a,b)=>new Date(b.publishedAt||b.updatedAt).getTime()-new Date(a.publishedAt||a.updatedAt).getTime())}
+export async function getPublishedDeclarationBySlug(slug:string){return (await listDeclarations("published")).find(x=>x.slug===slug)||null}
+async function write(rec:DeclarationRecord){const {error}=await createSupabaseAdmin().from("content_records").upsert({kind:KIND,id:rec.id,status:rec.status,slug:rec.slug,record:rec,created_at:rec.createdAt,updated_at:rec.updatedAt});if(error)throw error;return rec}
+export async function createDeclaration(input:{title:string;text:string;category:string;imageUrl?:string;status?:DeclarationStatus}){const now=new Date().toISOString(),existing=[...(await listDeclarations("draft")),...(await listDeclarations("published"))],root=declarationSlug(input.title);let slug=root,n=2;while(existing.some(x=>x.slug===slug))slug=`${root}-${n++}`;const status=input.status||"draft",rec:DeclarationRecord={id:crypto.randomUUID(),slug,title:input.title,text:input.text,category:input.category,imageUrl:input.imageUrl||undefined,createdAt:now,updatedAt:now,status};if(status==="published")rec.publishedAt=now;return write(rec)}
+async function findAny(id:string){const {data,error}=await createSupabaseAdmin().from("content_records").select("status,record").eq("kind",KIND).eq("id",id).maybeSingle();if(error)throw error;if(data?.status==="removed")return null;if(data)return data.record as DeclarationRecord;return initialDeclarations.find(row=>row.id===id)||null}
+export async function updateDeclaration(id:string,input:Partial<Pick<DeclarationRecord,"title"|"text"|"category"|"imageUrl">>){const found=await findAny(id);if(!found)throw new Error("Declarația nu a fost găsită.");return write({...found,...input,updatedAt:new Date().toISOString()})}
+export async function publishDeclaration(id:string){const found=await findAny(id);if(!found)throw new Error("Declarația nu a fost găsită.");const now=new Date().toISOString();return write({...found,status:"published",updatedAt:now,publishedAt:found.publishedAt||now})}
+export async function unpublishDeclaration(id:string){const found=await findAny(id);if(!found)throw new Error("Declarația nu a fost găsită.");const rec:DeclarationRecord={...found,status:"draft",updatedAt:new Date().toISOString()};delete rec.publishedAt;return write(rec)}
+export async function deleteDeclaration(id:string){const found=await findAny(id),db=createSupabaseAdmin();if(initialDeclarations.some(x=>x.id===id)){const seed=initialDeclarations.find(x=>x.id===id)!;const {error}=await db.from("content_records").upsert({kind:KIND,id,status:"removed",slug:seed.slug,record:seed,created_at:seed.createdAt,updated_at:new Date().toISOString()});if(error)throw error}else if(found){const {error}=await db.from("content_records").delete().eq("kind",KIND).eq("id",id);if(error)throw error}}
+export async function countDeclarationLikes(slug:string){const {count,error}=await createSupabaseAdmin().from("declaration_likes").select("*",{count:"exact",head:true}).eq("slug",slug);if(error)throw error;return count||0}
+export async function setDeclarationLike(slug:string,visitorId:string,liked:boolean){const db=createSupabaseAdmin();if(liked){const {error}=await db.from("declaration_likes").upsert({slug,visitor_id:visitorId});if(error)throw error}else{const {error}=await db.from("declaration_likes").delete().eq("slug",slug).eq("visitor_id",visitorId);if(error)throw error}return countDeclarationLikes(slug)}
