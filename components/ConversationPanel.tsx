@@ -1,7 +1,9 @@
 "use client";
 import Image from "next/image";
 import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
+import type { RealtimeChannel } from "@supabase/supabase-js";
 import type { Conversation } from "../lib/conversation";
+import { createSupabaseBrowser } from "../lib/supabase-browser";
 
 type MeteredFrameInstance = {
   init: (
@@ -103,6 +105,7 @@ export default function ConversationPanel({
     [panel, setPanel] = useState<"plus" | "emoji" | "stickers" | null>(null),
     [selectedMessage, setSelectedMessage] = useState<string | null>(null);
   const messagesEnd = useRef<HTMLDivElement>(null);
+  const realtimeChannel = useRef<RealtimeChannel | null>(null);
   const load = useCallback(async () => {
     try {
       const r = await fetch(endpoint, { cache: "no-store" });
@@ -124,20 +127,30 @@ export default function ConversationPanel({
   }, [endpoint]);
   useEffect(() => {
     void load();
-    const poll = window.setInterval(() => {
+    const supabase = createSupabaseBrowser();
+    const channel = invitationId && supabase
+      ? supabase
+          .channel(`conversation:${invitationId}`)
+          .on("broadcast", { event: "changed" }, () => void load())
+          .subscribe()
+      : null;
+    realtimeChannel.current = channel;
+    const fallback = window.setInterval(() => {
         if (document.visibilityState === "visible") void load();
-      }, 15000),
+      }, 60000),
       clock = window.setInterval(() => setNow(Date.now()), 60000);
     const visible = () => {
       if (document.visibilityState === "visible") void load();
     };
     document.addEventListener("visibilitychange", visible);
     return () => {
-      window.clearInterval(poll);
+      window.clearInterval(fallback);
       window.clearInterval(clock);
       document.removeEventListener("visibilitychange", visible);
+      realtimeChannel.current = null;
+      if (channel && supabase) void supabase.removeChannel(channel);
     };
-  }, [load]);
+  }, [invitationId, load]);
   useEffect(() => {
     messagesEnd.current?.scrollIntoView({ block: "end" });
   }, [conversation?.messages.length]);
@@ -159,6 +172,13 @@ export default function ConversationPanel({
         return null;
       }
       if (data.conversation) setConversation(data.conversation);
+      if (realtimeChannel.current) {
+        void realtimeChannel.current.send({
+          type: "broadcast",
+          event: "changed",
+          payload: { conversationId: invitationId },
+        });
+      }
       return data;
     } catch {
       setError("Conexiunea s-a întrerupt. Încearcă din nou.");
