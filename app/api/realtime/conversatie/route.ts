@@ -2,17 +2,16 @@ import {NextRequest} from "next/server";
 import {authorized} from "../../../../lib/admin-auth";
 import {PORTAL_COOKIE,verifyPortalSession} from "../../../../lib/portal-auth";
 import {createSupabaseAdmin} from "../../../../lib/supabase";
+import {canOpenConversationStream,validConversationId} from "../../../../lib/realtime-security";
 
 export const runtime="nodejs";
 export const dynamic="force-dynamic";
 export const maxDuration=300;
 
-const validId=(value:string|null):value is string=>!!value&&/^[0-9a-f-]{36}$/i.test(value);
-
 export async function GET(req:NextRequest){
  const id=req.nextUrl.searchParams.get("id"),role=req.nextUrl.searchParams.get("role");
- if(!validId(id)||!['adrian','ea'].includes(role||""))return new Response("Cerere invalidă.",{status:400});
- const permitted=role==="adrian"?authorized(req):verifyPortalSession(req.cookies.get(PORTAL_COOKIE)?.value)===id;
+ if(!validConversationId(id)||!['adrian','ea'].includes(role||""))return new Response("Cerere invalidă.",{status:400});
+ const permitted=canOpenConversationStream(role,id,authorized(req),verifyPortalSession(req.cookies.get(PORTAL_COOKIE)?.value));
  if(!permitted)return new Response("Unauthorized",{status:401});
 
  const encoder=new TextEncoder(),db=createSupabaseAdmin();

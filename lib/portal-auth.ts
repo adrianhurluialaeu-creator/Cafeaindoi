@@ -1,12 +1,12 @@
-import {createHash,createHmac,randomBytes,scrypt as scryptCallback,timingSafeEqual} from "crypto";
+import {createHash,randomBytes,scrypt as scryptCallback,timingSafeEqual} from "crypto";
 import {promisify} from "util";
 import {createSupabaseAdmin} from "./supabase";
+export {createPortalSession,verifyPortalSession} from "./portal-session";
 
 const scrypt=promisify(scryptCallback);
 export const PORTAL_COOKIE="cafeaindoi_portal";
 type PortalAccount={invitationId:string;email:string;activationHash?:string;activationExpiresAt?:string;passwordSalt?:string;passwordHash?:string;status:"invited"|"active"|"disabled";createdAt:string;activatedAt?:string};
 const digest=(value:string)=>createHash("sha256").update(value).digest("hex");
-const secret=()=>process.env.PORTAL_SESSION_SECRET||process.env.ADMIN_PASSWORD||"";
 const equal=(a:string,b:string)=>{const x=Buffer.from(a),y=Buffer.from(b);return x.length===y.length&&timingSafeEqual(x,y)};
 
 export async function readPortalAccount(invitationId:string){const {data,error}=await createSupabaseAdmin().from("portal_accounts").select("*").eq("invitation_id",invitationId).maybeSingle();if(error)throw error;if(!data)return null;return {invitationId:data.invitation_id,email:data.email,activationHash:data.activation_hash||undefined,activationExpiresAt:data.activation_expires_at||undefined,passwordSalt:data.password_salt||undefined,passwordHash:data.password_hash||undefined,status:data.status,createdAt:data.created_at,activatedAt:data.activated_at||undefined} as PortalAccount}
@@ -14,5 +14,3 @@ async function writeAccount(account:PortalAccount){const {error}=await createSup
 export async function createPortalActivation(invitationId:string,email:string){const token=randomBytes(32).toString("base64url"),now=new Date();const account:PortalAccount={invitationId,email:email.toLowerCase(),activationHash:digest(token),activationExpiresAt:new Date(now.getTime()+7*864e5).toISOString(),status:"invited",createdAt:now.toISOString()};await writeAccount(account);return token}
 export async function activatePortalAccount(invitationId:string,token:string,password:string){const account=await readPortalAccount(invitationId);if(!account||account.status!=="invited"||!account.activationHash||!account.activationExpiresAt||Date.parse(account.activationExpiresAt)<Date.now()||!equal(digest(token),account.activationHash))return false;const salt=randomBytes(16).toString("hex"),hash=(await scrypt(password,salt,64) as Buffer).toString("hex");await writeAccount({...account,status:"active",passwordSalt:salt,passwordHash:hash,activationHash:undefined,activationExpiresAt:undefined,activatedAt:new Date().toISOString()});return true}
 export async function authenticatePortal(email:string,password:string){const {data,error}=await createSupabaseAdmin().from("portal_accounts").select("*").eq("email",email.toLowerCase()).eq("status","active").maybeSingle();if(error)throw error;if(!data?.password_salt||!data.password_hash)return null;const hash=(await scrypt(password,data.password_salt,64) as Buffer).toString("hex");return equal(hash,data.password_hash)?data.invitation_id:null}
-export function createPortalSession(invitationId:string){if(!secret())throw new Error("Secretul sesiunii nu este configurat.");const payload=Buffer.from(JSON.stringify({id:invitationId,exp:Date.now()+7*864e5})).toString("base64url"),signature=createHmac("sha256",secret()).update(payload).digest("base64url");return `${payload}.${signature}`}
-export function verifyPortalSession(value?:string){if(!value||!secret())return null;const [payload,signature]=value.split(".");if(!payload||!signature)return null;const expected=createHmac("sha256",secret()).update(payload).digest("base64url");if(!equal(signature,expected))return null;try{const data=JSON.parse(Buffer.from(payload,"base64url").toString()) as {id:string;exp:number};return /^[0-9a-f-]{36}$/i.test(data.id)&&data.exp>Date.now()?data.id:null}catch{return null}}
