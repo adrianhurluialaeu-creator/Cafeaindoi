@@ -1,8 +1,6 @@
 import {createHash} from "crypto";
-import {get,put} from "@vercel/blob";
-
-type State={count:number;startedAt:number};
-function pathFor(scope:string,key:string){const secret=process.env.RATE_LIMIT_SECRET||process.env.ADMIN_PASSWORD||"cafeaindoi";const digest=createHash("sha256").update(`${secret}:${scope}:${key}`).digest("hex");return `rate-limits/${scope}/${digest}.json`}
-export async function consumeRateLimit(scope:string,key:string,max:number,windowMs:number){const path=pathFor(scope,key),now=Date.now();let state:State|null=null;try{const current=await get(path,{access:"private",useCache:false});if(current?.statusCode===200)state=JSON.parse(await new Response(current.stream).text()) as State}catch(error){console.error("[rate-limit] READ_ERROR",error)}if(!state||now-state.startedAt>=windowMs)state={count:0,startedAt:now};if(state.count>=max)return{allowed:false,retryAfter:Math.max(1,Math.ceil((state.startedAt+windowMs-now)/1000))};state.count+=1;try{await put(path,JSON.stringify(state),{access:"private",addRandomSuffix:false,allowOverwrite:true,contentType:"application/json"})}catch(error){console.error("[rate-limit] WRITE_ERROR",error)}return{allowed:true,retryAfter:0}}
-export async function resetRateLimit(scope:string,key:string){const path=pathFor(scope,key);try{await put(path,JSON.stringify({count:0,startedAt:Date.now()}),{access:"private",addRandomSuffix:false,allowOverwrite:true,contentType:"application/json"})}catch(error){console.error("[rate-limit] RESET_ERROR",error)}}
+import {createSupabaseAdmin} from "./supabase";
+function hash(scope:string,key:string){const secret=process.env.RATE_LIMIT_SECRET||process.env.ADMIN_PASSWORD||"cafeaindoi";return createHash("sha256").update(`${secret}:${scope}:${key}`).digest("hex")}
+export async function consumeRateLimit(scope:string,key:string,max:number,windowMs:number){const {data,error}=await createSupabaseAdmin().rpc("consume_rate_limit",{p_scope:scope,p_key_hash:hash(scope,key),p_max:max,p_window_ms:windowMs,p_now:Date.now()});if(error){console.error("[rate-limit] ERROR",error);return{allowed:true,retryAfter:0}}return data?.[0]||{allowed:true,retryAfter:0}}
+export async function resetRateLimit(scope:string,key:string){const {error}=await createSupabaseAdmin().from("rate_limits").delete().eq("scope",scope).eq("key_hash",hash(scope,key));if(error)console.error("[rate-limit] RESET_ERROR",error)}
 export function requestIp(req:Request){return req.headers.get("x-forwarded-for")?.split(",")[0]?.trim()||"unknown"}
