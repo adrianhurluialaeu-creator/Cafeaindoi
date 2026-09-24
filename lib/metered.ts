@@ -26,7 +26,7 @@ export function meetingRoomName(invitationId:string,meetingId:string){return `ca
 export async function createPrivateRoom(roomName:string){
  const settings={privacy:"private",maxParticipants:2,autoJoin:false,showInviteBox:false,enableRequestToJoin:false,enableChat:false,enableScreenSharing:false,joinVideoOn:false,joinAudioOn:false,ownerOnlyBroadcast:false,audioOnlyRoom:false,recordRoom:false,ejectAtRoomExp:false};
  try{await metered("/api/v1/room",{roomName,...settings})}
- catch(error){if(!(error instanceof MeteredError&&error.status===400&&/exist|already|duplicate/i.test(error.message)))throw error;await metered(`/api/v1/room/${encodeURIComponent(roomName)}`,settings,"PUT")}
+ catch(error){if(!(error instanceof MeteredError&&error.status===400&&/exist|already|duplicate/i.test(error.message)))throw error}
  return roomName;
 }
 
