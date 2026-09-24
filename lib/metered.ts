@@ -7,7 +7,7 @@ const config=()=>{
 
 async function metered(path:string,body:Record<string,unknown>){
  const {domain,secret}=config();
- const response=await fetch(`https://${domain}${path}?secretKey=${encodeURIComponent(secret)}`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body),cache:"no-store"});
+ const response=await fetch(`https://${domain}${path}?secretKey=${encodeURIComponent(secret)}`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body),cache:"no-store",signal:AbortSignal.timeout(10_000)});
  const result=await response.json().catch(()=>({}));
  if(!response.ok)throw new Error(typeof result?.message==="string"?result.message:"Serviciul video nu este disponibil momentan.");
  return result;
@@ -23,7 +23,7 @@ export async function createPrivateRoom(roomName:string){
 
 export async function createRoomAccess(roomName:string,name:string,isAdmin:boolean){
  const {domain}=config();
- const token=await metered("/api/v1/token",{roomName,name:name.slice(0,80),isAdmin,globalToken:false});
+ const token=await metered("/api/v1/token",{roomName,name:name.slice(0,80),isAdmin,globalToken:false,expireUnixSec:Math.floor(Date.now()/1000)+2*60*60});
  const accessToken=token?.token||token?.accessToken;
  if(!accessToken)throw new Error("Accesul la apel nu a putut fi creat.");
  return {roomURL:`https://${domain}/${roomName}`,accessToken:String(accessToken)};

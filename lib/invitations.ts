@@ -1,4 +1,5 @@
 import {del,get,list,put} from "@vercel/blob";
+import {deleteConversation} from "./conversation";
 
 export type InvitationStatus="noua"|"in_conversatie"|"inchisa";
 export type JourneyStage="invitatie"|"online"|"eu_la_ea"|"ea_la_mine"|"experienta";
@@ -76,7 +77,7 @@ export async function markWhatsAppSent(id:string,messageId:string){
 export async function deleteInvitation(id:string){
  const record=await readInvitation(id);
  if(!record)return false;
- await del(record.photoType?[recordPath(id),photoPath(id)]:recordPath(id));
+ await Promise.all([del(record.photoType?[recordPath(id),photoPath(id)]:recordPath(id)),deleteConversation(id)]);
  return true;
 }
 export async function readInvitationPhoto(id:string){return get(photoPath(id),{access:"private",useCache:false})}
