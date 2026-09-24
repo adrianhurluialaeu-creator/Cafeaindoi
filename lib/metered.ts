@@ -24,14 +24,14 @@ async function metered(path:string,body:Record<string,unknown>){
 export function meetingRoomName(invitationId:string,meetingId:string){return `cafea-${invitationId.slice(0,8)}-${meetingId.slice(0,8)}`}
 
 export async function createPrivateRoom(roomName:string){
- try{await metered("/api/v1/room",{roomName,privacy:"private",maxParticipants:2,autoJoin:true,enableChat:false,enableScreenSharing:false,joinVideoOn:false,joinAudioOn:false,recordRoom:false,ejectAtRoomExp:false})}
+ try{await metered("/api/v1/room",{roomName,privacy:"private",maxParticipants:2,autoJoin:true,enableChat:false,enableScreenSharing:false,joinVideoOn:true,joinAudioOn:true,recordRoom:false,ejectAtRoomExp:false})}
  catch(error){if(!(error instanceof MeteredError&&error.status===400&&/exist|already|duplicate/i.test(error.message)))throw error}
  return roomName;
 }
 
 export async function createRoomAccess(roomName:string,name:string,isAdmin:boolean){
  const {domain}=config();
- const token=await metered("/api/v1/token",{roomName,name:name.slice(0,80),isAdmin,expireUnixSec:Math.floor(Date.now()/1000)+2*60*60});
+ const token=await metered("/api/v1/token",{roomName,name:name.slice(0,80),isAdmin,joinVideoOn:true,joinAudioOn:true,expireUnixSec:Math.floor(Date.now()/1000)+2*60*60});
  const accessToken=token?.token||token?.accessToken;
  if(!accessToken)throw new Error("Accesul la apel nu a putut fi creat.");
  return {roomURL:`${domain}/${roomName}`,accessToken:String(accessToken)};
