@@ -22,6 +22,7 @@ import {
   PORTAL_COOKIE,
   verifyPortalSession,
 } from "../../../../lib/portal-auth";
+import {sendPush} from "../../../../lib/push";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 async function current() {
@@ -70,14 +71,16 @@ export async function POST(req: Request) {
         { error: "ID-ul conversației nu coincide." },
         { status: 409 },
       );
+    const conversation=await sendConversationMessage(
+      user.id,
+      "ea",
+      String(body.text || ""),
+      body.kind,
+    );
+    try{await sendPush(`Mesaj nou de la ${user.invitation.prenume}`,String(body.text||"Ai primit un mesaj nou.").slice(0,120),{url:`/admin/conversatii?id=${encodeURIComponent(user.id)}`,tag:`mesaj-${user.id}`})}catch(pushError){console.error("[push] MESSAGE_ERROR",pushError)}
     return NextResponse.json({
       conversationId: user.id,
-      conversation: await sendConversationMessage(
-        user.id,
-        "ea",
-        String(body.text || ""),
-        body.kind,
-      ),
+      conversation,
     });
   } catch (error) {
     return NextResponse.json(
@@ -113,24 +116,30 @@ export async function PATCH(req: Request) {
           String(body.emoji || ""),
         ),
       });
-    if (body.action === "propose")
+    if (body.action === "propose"){
+      const conversation=await proposeCoffeeMeeting(
+        user.id,
+        "ea",
+        String(body.startsAt || ""),
+        Number(body.plannedMinutes),
+      );
+      try{await sendPush("Propunere pentru o cafea",`${user.invitation.prenume} a propus o întâlnire.`,{url:`/admin/conversatii?id=${encodeURIComponent(user.id)}`,tag:`cafea-${user.id}`})}catch(pushError){console.error("[push] MEETING_ERROR",pushError)}
       return NextResponse.json({
         conversationId: user.id,
-        conversation: await proposeCoffeeMeeting(
-          user.id,
-          "ea",
-          String(body.startsAt || ""),
-          Number(body.plannedMinutes),
-        ),
+        conversation,
       });
-    if (body.action === "respond")
+    }
+    if (body.action === "respond"){
+      const conversation=await respondCoffeeMeeting(
+        user.id,
+        String(body.status || "") as "acceptata" | "refuzata" | "anulata",
+      );
+      try{await sendPush("Răspuns la cafea",`${user.invitation.prenume} a răspuns propunerii de întâlnire.`,{url:`/admin/conversatii?id=${encodeURIComponent(user.id)}`,tag:`raspuns-cafea-${user.id}`})}catch(pushError){console.error("[push] MEETING_RESPONSE_ERROR",pushError)}
       return NextResponse.json({
         conversationId: user.id,
-        conversation: await respondCoffeeMeeting(
-          user.id,
-          String(body.status || "") as "acceptata" | "refuzata" | "anulata",
-        ),
+        conversation,
       });
+    }
     if (body.action === "join") {
       let conversation = await readConversation(user.id);
       if (!conversation?.meeting || conversation.meeting.status !== "acceptata")
