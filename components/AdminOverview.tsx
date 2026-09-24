@@ -12,7 +12,7 @@ export default function AdminOverview(){
   {href:"/admin/declaratii",icon:"💌",title:"Declarații",desc:"Scrie și publică declarații de dragoste",meta:counts.drafts?counts.drafts+" ciorne":counts.declarations+" publicate"},
   {href:"/admin/compatibilitate",icon:"♡",title:"Compatibilitate",desc:"Profilul de referință al testului",meta:"Configurare"},
   {href:"/admin/contact",icon:"✉",title:"Contact",desc:"Mesaje și solicitări",meta:"Modul pregătit"},
-  {href:"/admin/statistici",icon:"▥",title:"Statistici",desc:"Trafic, conversii și activitate",meta:"Modul pregătit"},
+  {href:"/admin/statistici",icon:"▥",title:"Statistici",desc:"Trafic, conversii și activitate",meta:"Dashboard activ"},
   {href:"/admin/setari",icon:"⚙",title:"Setări",desc:"Configurarea site-ului și modulelor",meta:"Modul pregătit"}
  ];
  return <>

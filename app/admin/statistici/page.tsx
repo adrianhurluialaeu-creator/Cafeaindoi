@@ -1,3 +1,4 @@
 import AdminShell from "../../../components/AdminShell";
+import AdminStatistics from "../../../components/AdminStatistics";
 export const metadata={title:"Statistici · Admin",robots:{index:false,follow:false}};
-export default function Page(){return <AdminShell title="Statistici" subtitle="Trafic, conversii și activitate."><section className="admin-v2-placeholder"><div className="admin-v2-placeholder-icon">▥</div><h2>Statistici</h2><p>Aici putem conecta ulterior Vercel Analytics, Google Ads și alte surse de măsurare.</p><span>Modul pregătit pentru extindere</span></section></AdminShell>}
+export default function Page(){return <AdminShell title="Statistici" subtitle="Trafic, conversii și activitate — de la prima vizită până la apelul video."><AdminStatistics/></AdminShell>}

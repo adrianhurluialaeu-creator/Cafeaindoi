@@ -37,13 +37,13 @@ Vizitatoarea trebuie să îl cunoască pe Adrian în ritmul ei, să găsească r
 - [ ] Data publicării și actualizării pentru articole.
 - [ ] Conversia imaginilor mari în WebP/AVIF.
 - [ ] Încărcare progresivă pentru galeria foto.
-- [ ] Evenimente de măsurare pentru traseul: început → articol → test → invitație.
+- [x] Evenimente de măsurare first-party pentru traseul: vizită → test → invitație → apel video.
 
 ## Etapa 4 — Conținut și administrare
 
 - [ ] Program editorial gradual pentru articole și declarații.
 - [ ] Recomandări de articole bazate pe temele citite.
-- [ ] Statistici de conversie în Admin.
+- [x] Statistici de conversie în Admin: intervale, comparații, pâlnie, surse, campanii, pagini și export CSV.
 - [ ] Politică automată de retenție și ștergere a invitațiilor și fotografiilor.
 
 ## Etapa 5 — Consolidare după auditul tehnic

@@ -2,6 +2,7 @@
 import Image from "next/image";
 import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
 import type { Conversation } from "../lib/conversation";
+import {trackAnalytics} from "../lib/analytics-client";
 
 type MeteredFrameInstance = {
   init: (
@@ -212,9 +213,10 @@ export default function ConversationPanel({
         return;
       }
       if (mobile) {
+        trackAnalytics("video_call_started",{role});
         const url = mobileCallURL(data.call);
         window.location.assign(android ? androidChromeURL(url) : url);
-      } else setCall(data.call);
+      } else {trackAnalytics("video_call_started",{role});setCall(data.call)}
     } else
       window.setTimeout(
         () =>
