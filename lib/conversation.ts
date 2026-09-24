@@ -14,6 +14,13 @@ async function ensureConversation(invitationId:string){
  return db;
 }
 
+async function touchConversation(db:ReturnType<typeof createSupabaseAdmin>,invitationId:string,extendExpiry=false){
+ const now=new Date(),values:{updated_at:string;last_activity_at?:string;expires_at?:string}={updated_at:now.toISOString()};
+ if(extendExpiry){values.last_activity_at=now.toISOString();values.expires_at=new Date(now.getTime()+864e5).toISOString()}
+ const {error}=await db.from("conversations").update(values).eq("id",invitationId);
+ if(error)fail("Conversația nu a putut fi actualizată.");
+}
+
 export async function readConversation(invitationId:string):Promise<Conversation|null>{
  if(!validId(invitationId))return null;
  const db=await ensureConversation(invitationId);
@@ -37,11 +44,10 @@ export async function sendConversationMessage(invitationId:string,sender:Convers
  const text=raw.trim().replace(/\r\n/g,"\n").slice(0,2000);
  if(!text)fail("Mesajul este gol.");
  if(!["text","sticker","question","declaration","challenge"].includes(kind||""))fail("Tipul mesajului nu este valid.");
- const db=await ensureConversation(invitationId),now=new Date(),expires=new Date(now.getTime()+864e5).toISOString();
+ const db=await ensureConversation(invitationId);
  const {error}=await db.from("conversation_messages").insert({conversation_id:invitationId,sender,body:text,kind});
  if(error)fail("Mesajul nu a putut fi trimis.");
- const {error:updateError}=await db.from("conversations").update({last_activity_at:now.toISOString(),expires_at:expires,updated_at:now.toISOString()}).eq("id",invitationId);
- if(updateError)fail("Termenul conversației nu a putut fi actualizat.");
+ await touchConversation(db,invitationId,true);
  return readConversation(invitationId);
 }
 
@@ -53,6 +59,7 @@ export async function reactToConversationMessage(invitationId:string,messageId:s
  if(!message)fail("Mesajul nu mai există.");
  const {error}=await db.from("conversation_reactions").upsert({message_id:messageId,sender,emoji},{onConflict:"message_id,sender"});
  if(error)fail("Reacția nu a putut fi salvată.");
+ await touchConversation(db,invitationId);
  return readConversation(invitationId);
 }
 
@@ -64,6 +71,7 @@ export async function proposeCoffeeMeeting(invitationId:string,proposer:CoffeeMe
  const db=await ensureConversation(invitationId),row={id:crypto.randomUUID(),conversation_id:invitationId,proposer,starts_at:new Date(timestamp).toISOString(),planned_minutes:plannedMinutes,status:"propusa",room_name:null,updated_at:new Date().toISOString()};
  const {error}=await db.from("coffee_meetings").upsert(row,{onConflict:"conversation_id"});
  if(error)fail("Invitația la cafea nu a putut fi salvată.");
+ await touchConversation(db,invitationId);
  return readConversation(invitationId);
 }
 
@@ -72,6 +80,7 @@ export async function respondCoffeeMeeting(invitationId:string,status:CoffeeMeet
  const db=await ensureConversation(invitationId);
  const {data,error}=await db.from("coffee_meetings").update({status,updated_at:new Date().toISOString()}).eq("conversation_id",invitationId).select("id").maybeSingle();
  if(error||!data)fail("Invitația la cafea nu mai există.");
+ await touchConversation(db,invitationId);
  return readConversation(invitationId);
 }
 
@@ -79,6 +88,7 @@ export async function attachMeetingRoom(invitationId:string,roomName:string){
  const db=await ensureConversation(invitationId);
  const {data,error}=await db.from("coffee_meetings").update({room_name:roomName,updated_at:new Date().toISOString()}).eq("conversation_id",invitationId).select("id").maybeSingle();
  if(error||!data)fail("Invitația la cafea nu mai există.");
+ await touchConversation(db,invitationId);
  return readConversation(invitationId);
 }
 
