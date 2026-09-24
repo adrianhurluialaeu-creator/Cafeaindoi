@@ -23,24 +23,48 @@ export default async function Page({
 }: {
   searchParams: Promise<{ id?: string }>;
 }) {
-  const active = uniqueActive(await listInvitations()),
-    items = await Promise.all(
-      active.map(async (item) => {
-        const conversation = await readConversation(item.id),
-          last = conversation?.messages.at(-1);
-        return {
-          id: item.id,
-          prenume: item.prenume,
-          localitate: item.localitate,
-          tara: item.tara,
-          lastMessage: last?.text,
-          lastActivityAt: last?.createdAt,
-          expiresAt: conversation?.expiresAt,
-          meetingStatus: conversation?.meeting?.status,
-        };
-      }),
-    ),
-    selectedId = (await searchParams).id || "";
+  let active: Invitation[];
+  try {
+    active = uniqueActive(await listInvitations());
+  } catch (error) {
+    console.error("[admin/conversatii] LIST_ERROR", error);
+    return (
+      <AdminShell
+        title="Conversații"
+        subtitle="Mesagerie privată și întâlniri video Cafea în Doi."
+      >
+        <p className="formerror" role="alert">
+          Conversațiile nu au putut fi încărcate. Reîncarcă pagina peste câteva
+          secunde.
+        </p>
+      </AdminShell>
+    );
+  }
+  const loaded = await Promise.allSettled(
+    active.map(async (item) => {
+      const conversation = await readConversation(item.id);
+      const last = conversation?.messages.at(-1);
+      return {
+        id: item.id,
+        prenume: item.prenume,
+        localitate: item.localitate,
+        tara: item.tara,
+        lastMessage: last?.text,
+        lastActivityAt: last?.createdAt,
+        expiresAt: conversation?.expiresAt,
+        meetingStatus: conversation?.meeting?.status,
+      };
+    }),
+  );
+  const items = loaded.flatMap((result, index) => {
+    if (result.status === "fulfilled") return [result.value];
+    console.error("[admin/conversatii] CONVERSATION_ERROR", {
+      invitationId: active[index]?.id,
+      error: String(result.reason),
+    });
+    return [];
+  });
+  const selectedId = (await searchParams).id || "";
   return (
     <AdminShell
       title="Conversații"
