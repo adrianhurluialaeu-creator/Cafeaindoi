@@ -9,6 +9,7 @@ type Call={roomURL:string;accessToken:string};type Kind="sticker"|"question"|"de
 const emojis=["❤️","🥰","😘","😊","😂","😍","🤗","☕","🌹","✨","🙏","👍","💕","💋","🌙","🌞"];
 const stickers=["☕ Bem o cafea?","💭 Mă gândesc la tine","🤗 Îmbrățișare virtuală","😊 Mi-ai făcut ziua mai frumoasă","🌙 Noapte bună","❤️ Mi-e dor de tine","🎉 Provocare acceptată","🌹 Abia aștept să te văd"];
 const questions=["Care a fost cel mai frumos moment al zilei tale?","Ce loc ai vrea să descoperim împreună?","Ce lucru mic te face să zâmbești imediat?"];
+function mobileCallURL(call:Call){const url=new URL(call.roomURL.startsWith("http")?call.roomURL:`https://${call.roomURL}`);url.searchParams.set("accessToken",call.accessToken);url.searchParams.set("autoJoin","true");url.searchParams.set("joinVideoOn","true");url.searchParams.set("joinAudioOn","true");url.searchParams.set("showInviteBox","false");url.searchParams.set("disableChat","true");url.searchParams.set("disableScreenSharing","true");return url.toString()}
 
 export default function ConversationPanel({role,invitationId,partnerName,onBack,fullscreen=false}:Props){
  const endpoint=role==="adrian"?`/api/admin/conversatie?id=${encodeURIComponent(invitationId||"")}`:"/api/povestea-noastra/conversatie";
@@ -21,7 +22,7 @@ export default function ConversationPanel({role,invitationId,partnerName,onBack,
  async function send(e:FormEvent){e.preventDefault();if(!text.trim())return;const sent=await request("POST",{text});if(sent)setText("")}
  async function sendSpecial(value:string,kind:Kind){const sent=await request("POST",{text:value,kind});if(sent)setPanel(null)}
  async function propose(e:FormEvent<HTMLFormElement>){e.preventDefault();const fd=new FormData(e.currentTarget),data=await request("PATCH",{action:"propose",startsAt:fd.get("startsAt"),plannedMinutes:Number(fd.get("plannedMinutes"))});if(data)setEditMeeting(false)}
- async function join(){const data=await request("PATCH",{action:"join"});if(data?.call)setCall(data.call);else window.setTimeout(()=>document.querySelector<HTMLElement>(".conversation-card .formerror")?.scrollIntoView({behavior:"smooth",block:"center"}),0)}
+ async function join(){const data=await request("PATCH",{action:"join"});if(data?.call){const mobile=/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)||window.matchMedia("(pointer: coarse)").matches;if(mobile)window.location.assign(mobileCallURL(data.call));else setCall(data.call)}else window.setTimeout(()=>document.querySelector<HTMLElement>(".conversation-card .formerror")?.scrollIntoView({behavior:"smooth",block:"center"}),0)}
  const closeCall=useCallback(()=>setCall(null),[]);
  const meeting=conversation?.meeting,remaining=conversation?.expiresAt?Math.max(0,Date.parse(conversation.expiresAt)-now):0,hours=Math.floor(remaining/3600000),minutes=Math.floor(remaining%3600000/60000),adrianPhoto="/images/ChatGPT Image 20 sept. 2026, 20_47_04.webp",guestPhoto=role==="adrian"&&invitationId?`/api/admin/invitatii/${invitationId}/photo`:"/images/cafeaindoi-icon.webp";
  function avatar(sender:"adrian"|"ea"){return sender==="adrian"?adrianPhoto:guestPhoto}
