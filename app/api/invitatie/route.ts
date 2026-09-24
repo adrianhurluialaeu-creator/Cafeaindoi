@@ -3,30 +3,22 @@ import {deleteInvitation,saveInvitation} from "../../../lib/invitations";
 import {availableSlots,getSchedule} from "../../../lib/schedule";
 import {sendPush} from "../../../lib/push";
 import {consumeRateLimit,requestIp} from "../../../lib/rate-limit";
+import {deletePendingMedia,INVITATION_MEDIA_TYPES,validatePendingMedia,validPendingMediaPath} from "../../../lib/invitation-media";
 export const runtime="nodejs";
-const MAX_MEDIA=4*1024*1024,MEDIA_TYPES=new Set(["image/jpeg","video/webm","video/mp4"]);
 const safe=(s:string)=>s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]||c));
 export async function POST(req:Request){try{
  const limit=await consumeRateLimit("invitation",requestIp(req),5,60_000,{failClosed:true});if(!limit.allowed)return NextResponse.json({ok:false,error:"Prea multe încercări. Încearcă din nou peste un minut."},{status:429,headers:{"Retry-After":String(limit.retryAfter)}});
  const origin=req.headers.get("origin"),allowed=new Set(["https://www.cafeaindoi.eu","https://cafeaindoi.eu"]);if(origin&&!allowed.has(origin))return NextResponse.json({ok:false,error:"Cerere nepermisă."},{status:403});
  const d=await req.formData();if(String(d.get("website")||"").trim())return NextResponse.json({ok:true});
- const prenume=String(d.get("prenume")||"").trim().slice(0,80),localitate=String(d.get("localitate")||"").trim().slice(0,120),tara=String(d.get("tara")||"").trim().slice(0,80),despre=String(d.get("despre")||"").trim().slice(0,3000),email=String(d.get("email")||"").trim().toLowerCase().slice(0,254),varsta=Number(d.get("varsta")),ageOk=d.get("ageOk")==="on",privacyOk=d.get("privacyOk")==="on",photo=d.get("photo"),slotStart=String(d.get("slotStart")||"");
- if(!prenume||!localitate||!tara||!despre||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)||!Number.isInteger(varsta)||varsta<18||varsta>99||!ageOk||!privacyOk)return NextResponse.json({ok:false,error:"Verifică toate câmpurile obligatorii."},{status:400});
- const hasPhoto=photo instanceof File&&photo.size>0;
- if(!hasPhoto)return NextResponse.json({ok:false,error:"Verificarea live prin selfie sau video este obligatorie."},{status:400});
- if(hasPhoto&&!MEDIA_TYPES.has(photo.type))return NextResponse.json({ok:false,error:"Selfie-ul sau videoul are un format neacceptat."},{status:400});
- if(hasPhoto&&photo.size>MAX_MEDIA)return NextResponse.json({ok:false,error:"Materialul poate avea maximum 4 MB. Refă prezentarea video."},{status:413});
- const signature=Buffer.from(await photo.slice(0,16).arrayBuffer());
- const isJpeg=photo.type==="image/jpeg"&&signature[0]===0xff&&signature[1]===0xd8&&signature[2]===0xff;
- const isWebm=photo.type==="video/webm"&&signature[0]===0x1a&&signature[1]===0x45&&signature[2]===0xdf&&signature[3]===0xa3;
- const isMp4=photo.type==="video/mp4"&&signature.subarray(4,12).toString("ascii").includes("ftyp");
- if(!isJpeg&&!isWebm&&!isMp4)return NextResponse.json({ok:false,error:"Conținutul selfie-ului sau videoului nu este valid."},{status:400});
+ const prenume=String(d.get("prenume")||"").trim().slice(0,80),localitate=String(d.get("localitate")||"").trim().slice(0,120),tara=String(d.get("tara")||"").trim().slice(0,80),despre=String(d.get("despre")||"").trim().slice(0,3000),email=String(d.get("email")||"").trim().toLowerCase().slice(0,254),varsta=Number(d.get("varsta")),ageOk=d.get("ageOk")==="on",privacyOk=d.get("privacyOk")==="on",uploadPath=String(d.get("uploadPath")||""),photoType=String(d.get("photoType")||""),slotStart=String(d.get("slotStart")||"");
+ if(!prenume||!localitate||!tara||!despre||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)||!Number.isInteger(varsta)||varsta<18||varsta>99||!ageOk||!privacyOk){await deletePendingMedia(uploadPath);return NextResponse.json({ok:false,error:"Verifică toate câmpurile obligatorii."},{status:400})}
+ if(!validPendingMediaPath(uploadPath)||!INVITATION_MEDIA_TYPES.has(photoType))return NextResponse.json({ok:false,error:"Verificarea live prin selfie sau video este obligatorie."},{status:400});
+ if(!await validatePendingMedia(uploadPath,photoType)){await deletePendingMedia(uploadPath);return NextResponse.json({ok:false,error:"Conținutul selfie-ului sau videoului nu este valid."},{status:400})}
  const schedule=await getSchedule();
 
- if(schedule.enabled&&(!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.000Z$/.test(slotStart)||!(await availableSlots()).some(x=>x.start===slotStart)))return NextResponse.json({ok:false,error:"Ora aleasă nu mai este disponibilă. Alege alt interval."},{status:409});
- const key=process.env.RESEND_API_KEY_V2,to=process.env.INVITATION_TO_EMAIL,from=process.env.INVITATION_FROM_EMAIL||"Cafea în Doi <onboarding@resend.dev>";if(!key||!to)return NextResponse.json({ok:false,error:"Configurația de email este incompletă."},{status:503});
- const uploadedPhoto=hasPhoto?photo:undefined;
- let saved;try{saved=await saveInvitation({prenume,varsta,localitate,tara,email,despre,...(uploadedPhoto?{photoType:uploadedPhoto.type}:{}),...(schedule.enabled?{slotStart,slotDuration:schedule.duration,bookingStatus:"pending" as const}:{})},uploadedPhoto)}catch(error){console.error("[invitatie] STORAGE_ERROR",error);return NextResponse.json({ok:false,error:"Rezervarea nu poate fi salvată momentan."},{status:503})}
+ if(schedule.enabled&&(!/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.000Z$/.test(slotStart)||!(await availableSlots()).some(x=>x.start===slotStart))){await deletePendingMedia(uploadPath);return NextResponse.json({ok:false,error:"Ora aleasă nu mai este disponibilă. Alege alt interval."},{status:409})}
+ const key=process.env.RESEND_API_KEY_V2,to=process.env.INVITATION_TO_EMAIL,from=process.env.INVITATION_FROM_EMAIL||"Cafea în Doi <onboarding@resend.dev>";if(!key||!to){await deletePendingMedia(uploadPath);return NextResponse.json({ok:false,error:"Configurația de email este incompletă."},{status:503})}
+ let saved;try{saved=await saveInvitation({prenume,varsta,localitate,tara,email,despre,photoType,...(schedule.enabled?{slotStart,slotDuration:schedule.duration,bookingStatus:"pending" as const}:{})},uploadPath)}catch(error){console.error("[invitatie] STORAGE_ERROR",error);return NextResponse.json({ok:false,error:"Rezervarea nu poate fi salvată momentan."},{status:503})}
  const appointment=schedule.enabled?new Intl.DateTimeFormat("ro-RO",{timeZone:"Europe/Bucharest",dateStyle:"full",timeStyle:"short"}).format(new Date(slotStart)):"Fără oră propusă";
  const subject="Cafea în Doi — invitație nouă";const text=["Invitație nouă Cafea în Doi","",`Prenume: ${prenume}`,`Vârstă: ${varsta}`,`Localitate: ${localitate}`,`Țară: ${tara}`,`Email: ${email}`,`Cafea propusă: ${appointment} (ora României)`,"","Despre ea:",despre,"","Selfie-ul sau videoul este disponibil numai în zona privată de administrare."].join("\n");
  const html=`<div style="font-family:Arial,sans-serif;max-width:620px;margin:auto;color:#33241f"><h2>☕ Cafea în Doi</h2><p>Ai primit o invitație nouă.</p><div style="border:1px solid #eaded8;border-radius:14px;padding:20px;background:#fffaf7"><p><strong>Prenume:</strong> ${safe(prenume)}</p><p><strong>Vârstă:</strong> ${varsta}</p><p><strong>Localitate:</strong> ${safe(localitate)}</p><p><strong>Țară:</strong> ${safe(tara)}</p><p><strong>Email:</strong> ${safe(email)}</p><p><strong>Despre ea:</strong><br>${safe(despre).replace(/\n/g,"<br>")}</p><p><strong>Cafea propusă:</strong> ${safe(appointment)} (ora României)</p><p><strong>Prezentare:</strong> disponibilă numai în zona privată de administrare.</p></div></div>`;

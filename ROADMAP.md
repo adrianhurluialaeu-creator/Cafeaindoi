@@ -53,14 +53,14 @@ Vizitatoarea trebuie să îl cunoască pe Adrian în ritmul ei, să găsească r
 - [x] Alinierea uploadului live la limita Vercel: maximum 4 MB, selfie comprimat și bitrate video controlat.
 - [x] Rate limiting persistent și fail-closed pentru autentificarea Admin și invitații.
 - [x] Înlocuirea cookie-ului Admin determinist cu sesiune HMAC aleatoare și expirabilă.
-- [ ] Upload direct în Supabase Storage prin URL semnat, cu verificare server-side și curățarea fișierelor abandonate.
+- [x] Upload direct în Supabase Storage prin URL semnat, cu verificare server-side și curățarea fișierelor abandonate.
 
 ### Important
 
 - [x] Persistența profilului de compatibilitate în `app_settings`.
 - [x] Migrarea convenției Next.js 16 de la `middleware.ts` la `proxy.ts`.
 - [ ] Canale Supabase Realtime private, autorizate per conversație.
-- [ ] Ștergere fizică garantată cât mai aproape de pragul de 24 de ore.
+- [x] Ștergere fizică a mesajelor expirate verificată automat în fiecare oră prin Supabase Cron.
 - [ ] Validare/allowlist și servire sigură pentru imaginile externe ale declarațiilor.
 - [ ] Sanitizarea conținutului HTML primit prin webhook-ul Resend.
 - [ ] CSP fără `unsafe-inline`, cu nonce-uri generate per răspuns.

@@ -3,6 +3,7 @@ import Link from "next/link";
 import CoffeeBookingPicker from "./CoffeeBookingPicker";
 import LiveMediaCapture from "./LiveMediaCapture";
 import {FormEvent,useEffect,useRef,useState} from "react";
+import {createSupabaseBrowser} from "../lib/supabase-browser";
 
 declare global{interface Window{dataLayer:any[];gtag?:(...args:any[])=>void}}
 const CONVERSION_DESTINATION="AW-18467510680/66mnCKWvgYEdEJiz_-VE";
@@ -19,8 +20,16 @@ export default function InvitationForm(){
  async function submit(e:FormEvent<HTMLFormElement>){
   e.preventDefault();if(step===1){nextFromAbout();return}if(step===2){nextFromContact();return}setState("sending");setError("");
   if(!media){setError("Pentru verificarea live, fă un selfie sau un video de maximum 5 secunde.");setState("error");return}
-  const form=e.currentTarget,d=new FormData(form);if(enabled)d.set("slotStart",selectedSlot);d.set("photo",media);
-  try{const r=await fetch("/api/invitatie",{method:"POST",body:d}),x=await r.json();if(!r.ok)throw new Error(x.error||"Trimiterea a eșuat.");reportConversion();form.reset();setState("sent")}catch(err){setError(err instanceof Error?err.message:"Trimiterea a eșuat.");setState("error")}
+  const form=e.currentTarget,d=new FormData(form);if(enabled)d.set("slotStart",selectedSlot);
+  try{
+   const prepared=await fetch("/api/invitatie/upload",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({contentType:media.type,size:media.size})}),upload=await prepared.json();
+   if(!prepared.ok)throw new Error(upload.error||"Încărcarea nu a putut fi pregătită.");
+   const supabase=createSupabaseBrowser();if(!supabase)throw new Error("Serviciul de stocare nu este configurat.");
+   const {error:uploadError}=await supabase.storage.from("invitation-photos").uploadToSignedUrl(upload.path,upload.token,media,{contentType:media.type,upsert:false});
+   if(uploadError)throw new Error("Materialul live nu a putut fi încărcat. Încearcă din nou.");
+   d.set("uploadPath",upload.path);d.set("photoType",media.type);
+   const r=await fetch("/api/invitatie",{method:"POST",body:d}),x=await r.json();if(!r.ok)throw new Error(x.error||"Trimiterea a eșuat.");reportConversion();form.reset();setState("sent")
+  }catch(err){setError(err instanceof Error?err.message:"Trimiterea a eșuat.");setState("error")}
  }
  if(state==="sent")return <div className="success" role="status"><b>☕ {enabled?"Am primit propunerea ta pentru o cafea în doi.":"Invitația a fost trimisă."}</b><p>{enabled?"Îți confirm personal ziua și ora dacă putem bea cafeaua împreună.":"Mulțumesc că mi-ai scris. Dacă există interes reciproc, continuăm în spațiul nostru privat."}</p></div>;
  return <form ref={formRef} onSubmit={submit} encType="multipart/form-data" className="invite-form">
