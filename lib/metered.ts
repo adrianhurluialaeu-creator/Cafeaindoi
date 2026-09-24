@@ -13,9 +13,9 @@ function errorText(value:unknown){
  return value==null?"":String(value);
 }
 
-async function metered(path:string,body:Record<string,unknown>){
+async function metered(path:string,body:Record<string,unknown>,method:"POST"|"PUT"="POST"){
  const {domain,secret}=config();
- const response=await fetch(`https://${domain}${path}?secretKey=${encodeURIComponent(secret)}`,{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify(body),cache:"no-store",signal:AbortSignal.timeout(10_000)});
+ const response=await fetch(`https://${domain}${path}?secretKey=${encodeURIComponent(secret)}`,{method,headers:{"Content-Type":"application/json"},body:JSON.stringify(body),cache:"no-store",signal:AbortSignal.timeout(10_000)});
  const result=await response.json().catch(()=>({}));
  if(!response.ok){const upstream=errorText(result?.reason||result?.message||result?.error||result);console.error("[metered] API_ERROR",{path,status:response.status,reason:upstream});if(response.status===401)throw new MeteredError(401,"Cheia Metered nu este validă pentru acest domeniu.");if(response.status===403)throw new MeteredError(403,"Contul Metered nu permite această acțiune.");if(response.status===400)throw new MeteredError(400,upstream||"Metered a respins configurarea camerei video.");throw new MeteredError(response.status,"Serviciul video nu este disponibil momentan.")}
  return result;
@@ -24,8 +24,9 @@ async function metered(path:string,body:Record<string,unknown>){
 export function meetingRoomName(invitationId:string,meetingId:string){return `cafea-${invitationId.slice(0,8)}-${meetingId.slice(0,8)}`}
 
 export async function createPrivateRoom(roomName:string){
- try{await metered("/api/v1/room",{roomName,privacy:"private",maxParticipants:2,autoJoin:true,enableChat:false,enableScreenSharing:false,joinVideoOn:true,joinAudioOn:true,recordRoom:false,ejectAtRoomExp:false})}
- catch(error){if(!(error instanceof MeteredError&&error.status===400&&/exist|already|duplicate/i.test(error.message)))throw error}
+ const settings={privacy:"private",maxParticipants:2,autoJoin:true,showInviteBox:false,enableRequestToJoin:false,enableChat:false,enableScreenSharing:false,joinVideoOn:true,joinAudioOn:true,recordRoom:false,ejectAtRoomExp:false};
+ try{await metered("/api/v1/room",{roomName,...settings})}
+ catch(error){if(!(error instanceof MeteredError&&error.status===400&&/exist|already|duplicate/i.test(error.message)))throw error;await metered(`/api/v1/room/${encodeURIComponent(roomName)}`,settings,"PUT")}
  return roomName;
 }
 
