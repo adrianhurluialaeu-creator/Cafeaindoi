@@ -1,5 +1,6 @@
 import {deleteConversation} from "./conversation";
 import {createSupabaseAdmin} from "./supabase";
+import {INVITATION_MEDIA_BUCKET,validPendingMediaPath} from "./invitation-media";
 
 export type InvitationStatus="noua"|"in_conversatie"|"inchisa";
 export type JourneyStage="invitatie"|"online"|"eu_la_ea"|"ea_la_mine"|"experienta";
@@ -7,7 +8,6 @@ export type Challenge={id:string;proposer:"adrian"|"ea";title:string;description
 export type PhysicalMeeting={direction:"eu_la_ea"|"ea_la_mine";status:"propusa"|"confirmata"|"finalizata"|"anulata";city:string;place?:string;address?:string;mapUrl?:string;dateTime?:string;note?:string;locationSharedAt?:string};
 export type SharedExperience={status:"propusa"|"acceptata"|"planificata"|"finalizata"|"anulata";type:string;destination?:string;startDate?:string;endDate?:string;budget?:string;note?:string};
 export type Invitation={id:string;prenume:string;varsta:number;localitate:string;tara:string;email?:string;despre:string;createdAt:string;status:InvitationStatus;photoType?:string;slotStart?:string;slotDuration?:number;bookingStatus?:"pending"|"confirmed"|"declined";confirmationSentAt?:string;journeyStage?:JourneyStage;onlineSessions?:number;challenges?:Challenge[];physicalMeeting?:PhysicalMeeting;sharedExperience?:SharedExperience;portalAccessStatus?:"invited"|"active"|"disabled";portalInvitedAt?:string};
-const BUCKET="invitation-photos";
 const photoPath=(id:string)=>id;
 
 async function writeInvitation(record:Invitation){
@@ -15,13 +15,13 @@ async function writeInvitation(record:Invitation){
  if(error)throw error;
 }
 
-export async function saveInvitation(input:Omit<Invitation,"id"|"createdAt"|"status">,photo?:File){
+export async function saveInvitation(input:Omit<Invitation,"id"|"createdAt"|"status">,pendingPhotoPath?:string){
  const id=crypto.randomUUID();
  const record:Invitation={...input,id,createdAt:new Date().toISOString(),status:"noua"};
  const db=createSupabaseAdmin();
- if(photo){const {error}=await db.storage.from(BUCKET).upload(photoPath(id),Buffer.from(await photo.arrayBuffer()),{contentType:photo.type,upsert:true});if(error)throw error}
+ if(pendingPhotoPath){if(!validPendingMediaPath(pendingPhotoPath))throw new Error("Calea materialului este invalidă.");const {error}=await db.storage.from(INVITATION_MEDIA_BUCKET).move(pendingPhotoPath,photoPath(id));if(error)throw error}
  try{await writeInvitation(record)}
- catch(error){if(photo)await db.storage.from(BUCKET).remove([photoPath(id)]);throw error}
+ catch(error){if(pendingPhotoPath)await db.storage.from(INVITATION_MEDIA_BUCKET).remove([photoPath(id)]);throw error}
  return record;
 }
 export async function readInvitation(id:string){
@@ -76,13 +76,13 @@ export async function deleteInvitation(id:string){
  const record=await readInvitation(id);
  if(!record)return false;
  const db=createSupabaseAdmin();
- if(record.photoType)await db.storage.from(BUCKET).remove([photoPath(id)]);
+ if(record.photoType)await db.storage.from(INVITATION_MEDIA_BUCKET).remove([photoPath(id)]);
  const {error}=await db.from("invitations").delete().eq("id",id);if(error)throw error;
  await deleteConversation(id);
  return true;
 }
 export async function readInvitationPhoto(id:string){
- const {data,error}=await createSupabaseAdmin().storage.from(BUCKET).download(photoPath(id));
+ const {data,error}=await createSupabaseAdmin().storage.from(INVITATION_MEDIA_BUCKET).download(photoPath(id));
  if(error||!data)return null;
  return {statusCode:200,stream:data.stream()};
 }
