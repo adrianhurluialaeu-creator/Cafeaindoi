@@ -8,16 +8,15 @@
     "start": "next start"
   },
   "dependencies": {
-    "@supabase/supabase-js": "^2.117.1",
-    "@types/node": "latest",
-    "@types/react": "latest",
-    "@types/react-dom": "latest",
-    "@types/web-push": "^3.6.4",
-    "@vercel/blob": "2.6.1",
-    "next": "latest",
-    "react": "latest",
-    "react-dom": "latest",
-    "typescript": "latest",
-    "web-push": "^3.6.7"
+    "@supabase/supabase-js": "2.117.1",
+    "@types/node": "26.6.2",
+    "@types/react": "19.3.0",
+    "@types/react-dom": "19.3.0",
+    "@types/web-push": "3.6.4",
+    "next": "16.3.6",
+    "react": "19.3.0",
+    "react-dom": "19.3.0",
+    "typescript": "7.0.2",
+    "web-push": "3.6.7"
   }
 }

@@ -1,15 +1,12 @@
 import {NextRequest,NextResponse} from "next/server";
-import crypto from "crypto";
+import {authorized} from "../../../../lib/admin-auth";
 import {createDeclaration,deleteDeclaration,listDeclarations,publishDeclaration,unpublishDeclaration,updateDeclaration} from "../../../../lib/declarations";
 
 export const runtime="nodejs";
 export const dynamic="force-dynamic";
 
-function token(){return crypto.createHash("sha256").update("cafeaindoi:"+(process.env.ADMIN_PASSWORD||"")).digest("hex")}
-function auth(req:NextRequest){const p=process.env.ADMIN_PASSWORD;return !!p&&req.cookies.get("cafeaindoi_admin")?.value===token()}
-
 export async function GET(req:NextRequest){
- if(!auth(req))return NextResponse.json({error:"Unauthorized"},{status:401});
+ if(!authorized(req))return NextResponse.json({error:"Unauthorized"},{status:401});
  try{
   const [drafts,published]=await Promise.all([listDeclarations("draft"),listDeclarations("published")]);
   return NextResponse.json({drafts,published},{headers:{"Cache-Control":"no-store"}});
@@ -17,7 +14,7 @@ export async function GET(req:NextRequest){
 }
 
 export async function POST(req:NextRequest){
- if(!auth(req))return NextResponse.json({error:"Unauthorized"},{status:401});
+ if(!authorized(req))return NextResponse.json({error:"Unauthorized"},{status:401});
  try{
   const b=await req.json();
   const title=String(b.title||"").trim().slice(0,180);
@@ -33,7 +30,7 @@ export async function POST(req:NextRequest){
 }
 
 export async function PATCH(req:NextRequest){
- if(!auth(req))return NextResponse.json({error:"Unauthorized"},{status:401});
+ if(!authorized(req))return NextResponse.json({error:"Unauthorized"},{status:401});
  try{
   const b=await req.json();
   const id=String(b.id||"");
@@ -60,7 +57,7 @@ export async function PATCH(req:NextRequest){
 }
 
 export async function DELETE(req:NextRequest){
- if(!auth(req))return NextResponse.json({error:"Unauthorized"},{status:401});
+ if(!authorized(req))return NextResponse.json({error:"Unauthorized"},{status:401});
  try{
   const id=req.nextUrl.searchParams.get("id")||"";
   if(!/^[0-9a-f-]{36}$/i.test(id))return NextResponse.json({error:"ID invalid."},{status:400});

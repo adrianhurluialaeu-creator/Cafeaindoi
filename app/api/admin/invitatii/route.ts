@@ -1,18 +1,11 @@
-import {createHash,timingSafeEqual} from "crypto";
 import {NextRequest,NextResponse} from "next/server";
+import {authorized} from "../../../../lib/admin-auth";
 import {availableSlots,getSchedule} from "../../../../lib/schedule";
 import {sendConfirmationEmail} from "../../../../lib/confirmation-email";
 import {sendMeetingLocationEmail} from "../../../../lib/meeting-email";
 import {deleteInvitation,listInvitations,markConfirmationSent,readInvitation,updateBooking,updateInvitationStatus,updateJourney,type Challenge,type InvitationStatus,type JourneyStage,type PhysicalMeeting,type SharedExperience} from "../../../../lib/invitations";
 export const runtime="nodejs";
 export const dynamic="force-dynamic";
-function authorized(req:NextRequest){
- const password=process.env.ADMIN_PASSWORD;
- const cookie=req.cookies.get("cafeaindoi_admin")?.value;
- if(!password||!cookie||!/^[a-f0-9]{64}$/.test(cookie))return false;
- const expected=createHash("sha256").update("cafeaindoi:"+password).digest("hex");
- return timingSafeEqual(Buffer.from(cookie),Buffer.from(expected));
-}
 export {authorized};
 const validId=(id:unknown)=>typeof id==="string"&&/^[0-9a-f-]{36}$/i.test(id);
 export async function GET(req:NextRequest){

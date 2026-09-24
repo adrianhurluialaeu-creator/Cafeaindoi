@@ -15,7 +15,8 @@ Vizitatoarea trebuie să îl cunoască pe Adrian în ritmul ei, să găsească r
 - [ ] Eliminarea accesului Admin din subsolurile articolelor vechi.
 - [x] Banner cookies mai compact pe mobil și desktop.
 - [ ] Uniformizarea meniului desktop pe toate paginile.
-- [ ] Limitare persistentă pentru autentificare și formulare.
+- [x] Limitare persistentă în Supabase pentru autentificare și formularul de invitație.
+- [x] Sesiuni Admin semnate, aleatoare și cu expirare verificată pe server.
 - [x] Verificarea conținutului real al fișierelor încărcate.
 
 ## Etapa 2 — Conversie și cunoaștere graduală
@@ -45,11 +46,38 @@ Vizitatoarea trebuie să îl cunoască pe Adrian în ritmul ei, să găsească r
 - [ ] Statistici de conversie în Admin.
 - [ ] Politică automată de retenție și ștergere a invitațiilor și fotografiilor.
 
+## Etapa 5 — Consolidare după auditul tehnic
+
+### Critic
+
+- [x] Alinierea uploadului live la limita Vercel: maximum 4 MB, selfie comprimat și bitrate video controlat.
+- [x] Rate limiting persistent și fail-closed pentru autentificarea Admin și invitații.
+- [x] Înlocuirea cookie-ului Admin determinist cu sesiune HMAC aleatoare și expirabilă.
+- [ ] Upload direct în Supabase Storage prin URL semnat, cu verificare server-side și curățarea fișierelor abandonate.
+
+### Important
+
+- [x] Persistența profilului de compatibilitate în `app_settings`.
+- [x] Migrarea convenției Next.js 16 de la `middleware.ts` la `proxy.ts`.
+- [ ] Canale Supabase Realtime private, autorizate per conversație.
+- [ ] Ștergere fizică garantată cât mai aproape de pragul de 24 de ore.
+- [ ] Validare/allowlist și servire sigură pentru imaginile externe ale declarațiilor.
+- [ ] Sanitizarea conținutului HTML primit prin webhook-ul Resend.
+- [ ] CSP fără `unsafe-inline`, cu nonce-uri generate per răspuns.
+
+### Calitate și operare
+
+- [x] Versiuni exacte pentru dependențele directe și lockfile păstrat.
+- [ ] Teste automate pentru autentificare, invitații, portal, conversații și retenție.
+- [ ] ESLint și verificări CI obligatorii înainte de deploy.
+- [ ] Înlocuirea elementelor `<img>` rămase cu `next/image` unde este potrivit.
+- [ ] Activarea și verificarea observabilității Vercel pentru erorile runtime.
+
 ## Indicatori urmăriți
 
 - accesări ale traseului „Începe de aici”;
 - articole citite înainte de invitație;
 - rata de începere și finalizare a testului;
 - rata de începere și trimitere a invitației;
-- abandonul la fotografie, WhatsApp și alegerea orei;
+- abandonul la fotografia/video live și alegerea orei;
 - distribuiri și reveniri pe site.

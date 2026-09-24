@@ -2,11 +2,12 @@ import {NextResponse} from "next/server";
 import {deleteInvitation,saveInvitation} from "../../../lib/invitations";
 import {availableSlots,getSchedule} from "../../../lib/schedule";
 import {sendPush} from "../../../lib/push";
+import {consumeRateLimit,requestIp} from "../../../lib/rate-limit";
 export const runtime="nodejs";
-const WINDOW=60_000,MAX=5,MAX_MEDIA=12*1024*1024,MEDIA_TYPES=new Set(["image/jpeg","video/webm","video/mp4"]);const hits=new Map<string,{n:number,t:number}>();
+const MAX_MEDIA=4*1024*1024,MEDIA_TYPES=new Set(["image/jpeg","video/webm","video/mp4"]);
 const safe=(s:string)=>s.replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]||c));
 export async function POST(req:Request){try{
- const ip=req.headers.get("x-forwarded-for")?.split(",")[0]?.trim()||"unknown",now=Date.now(),h=hits.get(ip);if(h&&now-h.t<WINDOW&&h.n>=MAX)return NextResponse.json({ok:false,error:"Prea multe încercări. Încearcă din nou peste un minut."},{status:429});hits.set(ip,!h||now-h.t>=WINDOW?{n:1,t:now}:{n:h.n+1,t:h.t});
+ const limit=await consumeRateLimit("invitation",requestIp(req),5,60_000,{failClosed:true});if(!limit.allowed)return NextResponse.json({ok:false,error:"Prea multe încercări. Încearcă din nou peste un minut."},{status:429,headers:{"Retry-After":String(limit.retryAfter)}});
  const origin=req.headers.get("origin"),allowed=new Set(["https://www.cafeaindoi.eu","https://cafeaindoi.eu"]);if(origin&&!allowed.has(origin))return NextResponse.json({ok:false,error:"Cerere nepermisă."},{status:403});
  const d=await req.formData();if(String(d.get("website")||"").trim())return NextResponse.json({ok:true});
  const prenume=String(d.get("prenume")||"").trim().slice(0,80),localitate=String(d.get("localitate")||"").trim().slice(0,120),tara=String(d.get("tara")||"").trim().slice(0,80),despre=String(d.get("despre")||"").trim().slice(0,3000),email=String(d.get("email")||"").trim().toLowerCase().slice(0,254),varsta=Number(d.get("varsta")),ageOk=d.get("ageOk")==="on",privacyOk=d.get("privacyOk")==="on",photo=d.get("photo"),slotStart=String(d.get("slotStart")||"");
@@ -14,7 +15,7 @@ export async function POST(req:Request){try{
  const hasPhoto=photo instanceof File&&photo.size>0;
  if(!hasPhoto)return NextResponse.json({ok:false,error:"Verificarea live prin selfie sau video este obligatorie."},{status:400});
  if(hasPhoto&&!MEDIA_TYPES.has(photo.type))return NextResponse.json({ok:false,error:"Selfie-ul sau videoul are un format neacceptat."},{status:400});
- if(hasPhoto&&photo.size>MAX_MEDIA)return NextResponse.json({ok:false,error:"Materialul poate avea maximum 12 MB."},{status:413});
+ if(hasPhoto&&photo.size>MAX_MEDIA)return NextResponse.json({ok:false,error:"Materialul poate avea maximum 4 MB. Refă prezentarea video."},{status:413});
  const signature=Buffer.from(await photo.slice(0,16).arrayBuffer());
  const isJpeg=photo.type==="image/jpeg"&&signature[0]===0xff&&signature[1]===0xd8&&signature[2]===0xff;
  const isWebm=photo.type==="video/webm"&&signature[0]===0x1a&&signature[1]===0x45&&signature[2]===0xdf&&signature[3]===0xa3;

@@ -1,18 +1,9 @@
 import {NextRequest,NextResponse} from "next/server";
-import crypto from "crypto";
+import {authorized} from "../../../../lib/admin-auth";
 import {approveOpinion,deleteApprovedOpinion,listOpinions,rejectOpinion,unpublishOpinion} from "../../../../lib/opinions";
 
 export const runtime="nodejs";
 export const dynamic="force-dynamic";
-
-function expectedToken(){
- return crypto.createHash("sha256").update("cafeaindoi:"+(process.env.ADMIN_PASSWORD||"")).digest("hex");
-}
-function authorized(req:NextRequest){
- const password=process.env.ADMIN_PASSWORD;
- const value=req.cookies.get("cafeaindoi_admin")?.value;
- return !!password&&!!value&&value===expectedToken();
-}
 
 export async function GET(req:NextRequest){
  if(!authorized(req))return NextResponse.json({error:"Unauthorized"},{status:401});
