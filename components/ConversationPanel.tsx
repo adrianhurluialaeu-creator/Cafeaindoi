@@ -256,7 +256,7 @@ export default function ConversationPanel({
   }
   return (
     <section
-      className={`conversation-card conversation-preview ${fullscreen ? "is-fullscreen" : ""}`}
+      className={`conversation-card conversation-preview ${fullscreen ? "is-fullscreen" : ""} ${call ? "is-in-call" : ""}`}
     >
       <header className="conversation-head">
         {onBack ? (
