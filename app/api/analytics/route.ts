@@ -21,7 +21,9 @@ export async function POST(req:Request){
   if(!uuid.test(body.sessionId)||!uuid.test(body.visitorId)||!events.has(body.event))return NextResponse.json({error:"Date invalide."},{status:400});
   const source=body.attribution&&typeof body.attribution==="object"?body.attribution:{};
   let referrerHost:string|null=null;try{const ref=clean(body.referrer,500);if(ref)referrerHost=new URL(ref).hostname.slice(0,160)}catch{}
-  const now=new Date().toISOString(),db=createSupabaseAdmin(),visitorHash=createHash("sha256").update(`${process.env.ANALYTICS_HASH_SECRET||process.env.ADMIN_SESSION_SECRET||"cafeaindoi"}:${body.visitorId}`).digest("hex");
+  const hashSecret=process.env.ANALYTICS_HASH_SECRET||process.env.ADMIN_SESSION_SECRET||process.env.ADMIN_PASSWORD;
+  if(!hashSecret)throw new Error("ANALYTICS_HASH_SECRET is not configured");
+  const now=new Date().toISOString(),db=createSupabaseAdmin(),visitorHash=createHash("sha256").update(`${hashSecret}:${body.visitorId}`).digest("hex");
   const {error:sessionError}=await db.from("analytics_sessions").upsert({id:body.sessionId,visitor_hash:visitorHash,started_at:now,last_seen_at:now,landing_path:safePath(body.path),referrer_host:referrerHost,utm_source:clean(source.source),utm_medium:clean(source.medium),utm_campaign:clean(source.campaign),utm_content:clean(source.content),utm_term:clean(source.term),gclid:clean(source.gclid,200),device_type:["mobile","tablet","desktop"].includes(body.device)?body.device:"desktop"},{onConflict:"id",ignoreDuplicates:true});
   if(sessionError)throw sessionError;
   await db.from("analytics_sessions").update({last_seen_at:now}).eq("id",body.sessionId);

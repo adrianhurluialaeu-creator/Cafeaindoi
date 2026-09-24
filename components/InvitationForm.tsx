@@ -31,7 +31,7 @@ export default function InvitationForm(){
    const {error:uploadError}=await supabase.storage.from("invitation-photos").uploadToSignedUrl(upload.path,upload.token,media,{contentType:media.type,upsert:false});
    if(uploadError)throw new Error("Materialul live nu a putut fi încărcat. Încearcă din nou.");
    d.set("uploadPath",upload.path);d.set("photoType",media.type);
-   const r=await fetch("/api/invitatie",{method:"POST",body:d}),x=await r.json();if(!r.ok)throw new Error(x.error||"Trimiterea a eșuat.");trackAnalytics("invitation_submitted",{scheduled:enabled});reportConversion();form.reset();setState("sent")
+   const r=await fetch("/api/invitatie",{method:"POST",body:d}),x=await r.json();if(!r.ok)throw new Error(x.error||"Trimiterea a eșuat.");trackAnalytics("invitation_submitted",{scheduled:enabled,invitationId:x.invitationId});reportConversion();form.reset();setState("sent")
   }catch(err){setError(err instanceof Error?err.message:"Trimiterea a eșuat.");setState("error")}
  }
  if(state==="sent")return <div className="success" role="status"><b>☕ {enabled?"Am primit propunerea ta pentru o cafea în doi.":"Invitația a fost trimisă."}</b><p>{enabled?"Îți confirm personal ziua și ora dacă putem bea cafeaua împreună.":"Mulțumesc că mi-ai scris. Dacă există interes reciproc, continuăm în spațiul nostru privat."}</p></div>;

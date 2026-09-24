@@ -213,10 +213,10 @@ export default function ConversationPanel({
         return;
       }
       if (mobile) {
-        trackAnalytics("video_call_started",{role});
+        trackAnalytics("video_call_started",{role,invitationId:invitationId||data.call.conversationId});
         const url = mobileCallURL(data.call);
         window.location.assign(android ? androidChromeURL(url) : url);
-      } else {trackAnalytics("video_call_started",{role});setCall(data.call)}
+      } else {trackAnalytics("video_call_started",{role,invitationId:invitationId||data.call.conversationId});setCall(data.call)}
     } else
       window.setTimeout(
         () =>
