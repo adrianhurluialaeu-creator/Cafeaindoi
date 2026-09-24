@@ -4,6 +4,8 @@ export type ConversationMessage={
  id:string;
  sender:"adrian"|"ea";
  text:string;
+ kind?:"text"|"sticker"|"question"|"declaration"|"challenge";
+ reactions?:{sender:"adrian"|"ea";emoji:string}[];
  createdAt:string;
 };
 
@@ -47,13 +49,21 @@ export async function readConversation(invitationId:string){
  return row;
 }
 
-export async function sendConversationMessage(invitationId:string,sender:ConversationMessage["sender"],raw:string){
+export async function sendConversationMessage(invitationId:string,sender:ConversationMessage["sender"],raw:string,kind:ConversationMessage["kind"]="text"){
  const text=raw.trim().replace(/\r\n/g,"\n").slice(0,2000);
  if(!text)throw new Error("Mesajul este gol.");
+ if(!["text","sticker","question","declaration","challenge"].includes(kind||""))throw new Error("Tipul mesajului nu este valid.");
  const current=await readConversation(invitationId)||{invitationId,messages:[]};
  const now=new Date();
- const message:ConversationMessage={id:crypto.randomUUID(),sender,text,createdAt:now.toISOString()};
+ const message:ConversationMessage={id:crypto.randomUUID(),sender,text,kind,createdAt:now.toISOString()};
  return write({...current,messages:[...current.messages.slice(-199),message],lastActivityAt:now.toISOString(),expiresAt:new Date(now.getTime()+DAY).toISOString()});
+}
+
+export async function reactToConversationMessage(invitationId:string,messageId:string,sender:ConversationMessage["sender"],emoji:string){
+ if(!["❤️","😂","🥰","👍","😮","😔"].includes(emoji))throw new Error("Reacția nu este validă.");
+ const current=await readConversation(invitationId);if(!current)throw new Error("Conversația nu există.");
+ const messages=current.messages.map(message=>message.id!==messageId?message:{...message,reactions:[...(message.reactions||[]).filter(item=>item.sender!==sender),{sender,emoji}]});
+ return write({...current,messages});
 }
 
 export async function proposeCoffeeMeeting(invitationId:string,proposer:CoffeeMeeting["proposer"],startsAt:string,plannedMinutes:number){
