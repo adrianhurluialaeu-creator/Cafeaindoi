@@ -156,7 +156,7 @@ export default function ConversationPanel({
       });
     if (data) setEditMeeting(false);
   }
-  function join(){trackAnalytics("audio_call_started",{role,invitationId:invitationId||""});setCallStartKey(value=>value+1)}
+  function join(){trackAnalytics("video_call_started",{role,invitationId:invitationId||""});setCallStartKey(value=>value+1)}
   const meeting = conversation?.meeting,
     remaining = conversation?.expiresAt
       ? Math.max(0, Date.parse(conversation.expiresAt) - now)
@@ -205,7 +205,7 @@ export default function ConversationPanel({
           onClick={
             meeting?.status === "acceptata" ? join : () => setEditMeeting(true)
           }
-          aria-label="Propune sau începe un apel audio"
+          aria-label="Propune sau începe un apel video"
         >
           <PhoneGlyph />
         </button>
@@ -306,7 +306,7 @@ export default function ConversationPanel({
             <div>
               <b>
                 {meeting.status === "propusa"
-                  ? "Apel audio propus"
+                  ? "Apel video propus"
                   : "O Cafea în Doi"}
               </b>
               <small>
@@ -519,7 +519,7 @@ function ComposerPanel({
       {panel === "plus" && (
         <div className="plus-grid">
           <button onClick={openMeeting}>
-            ☎<span>Apel audio</span>
+            📹<span>Apel video</span>
           </button>
           <button onClick={openStickers}>
             💟<span>Sticker</span>
@@ -575,7 +575,7 @@ function MeetingForm({
   minimum.setMinutes(minimum.getMinutes() - minimum.getTimezoneOffset());
   return (
     <form className="coffee-propose" onSubmit={propose}>
-      <strong>Propune un apel audio</strong>
+      <strong>Propune un apel video</strong>
       <label>
         Data și ora
         <input

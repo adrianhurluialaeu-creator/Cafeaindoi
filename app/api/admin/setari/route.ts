@@ -14,7 +14,7 @@ function integrations(settings:AdminSettings){
   {key:"supabase",label:"Supabase",configured:Boolean(process.env.NEXT_PUBLIC_SUPABASE_URL&&process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY&&process.env.SUPABASE_SERVICE_ROLE_KEY),detail:"Bază de date, autentificare și stocare"},
   {key:"resend",label:"Resend",configured:Boolean(process.env.RESEND_API_KEY_V2||process.env.RESEND_API_KEY),detail:"Emailuri tranzacționale"},
   {key:"google",label:"Google Ads",configured:settings.privacy.googleAdsEnabled,detail:"Conversii și campanii"},
-  {key:"audio",label:"Apel audio",configured:true,detail:"WebRTC direct, fără cameră și fără înregistrare"},
+  {key:"video",label:"Apel video",configured:true,detail:"WebRTC direct, cu cameră și microfon, fără înregistrare"},
   {key:"vercel",label:"Vercel",configured:Boolean(process.env.VERCEL||process.env.VERCEL_ENV),detail:"Hosting și deployment"}
  ];
 }

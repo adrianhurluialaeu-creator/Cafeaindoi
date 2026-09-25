@@ -76,7 +76,7 @@ export async function GET(req:NextRequest){
    {key:"submitted",label:"Invitație trimisă",value:current.summary.invitations},
    {key:"activated",label:"Cont activat",value:current.summary.activated},
    {key:"conversation",label:"Conversație creată",value:current.summary.conversations},
-   {key:"audio",label:"Apel audio început",value:current.summary.videoCalls}
+   {key:"video",label:"Apel video început",value:current.summary.videoCalls}
   ];
   const response={range:days||"all",analyticsAvailable:true,summary:current.summary,deltas:previous?{visitors:percentChange(current.summary.visitors,previous.summary.visitors),sessions:percentChange(current.summary.sessions,previous.summary.sessions),invitations:percentChange(current.summary.invitations,previous.summary.invitations),conversion:Number((current.summary.conversion-previous.summary.conversion).toFixed(1))}:null,trend:[...dayMap.values()],funnel,sources:[...sourceMap.values()].map(row=>({...row,campaigns:[...row.campaigns],conversion:row.sessions?Number((row.invitations/row.sessions*100).toFixed(1)):0})).sort((a,b)=>b.sessions-a.sessions).slice(0,12),pages:[...pages].map(([path,views])=>({path,views})).sort((a,b)=>b.views-a.views).slice(0,12),activity:{invitations:current.invitations.length,accounts:current.accounts.length,conversations:current.conversations.length,messages:current.messages.length,meetings:current.meetings.length,acceptedMeetings:current.meetings.filter(item=>item.status==="acceptata").length,videoCalls:current.meetings.filter(item=>item.room_name).length}};
   return NextResponse.json(response,{headers:{"Cache-Control":"private, no-store"}});
