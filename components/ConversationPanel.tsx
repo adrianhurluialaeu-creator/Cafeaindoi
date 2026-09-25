@@ -609,4 +609,4 @@ function MeetingForm({
     </form>
   );
 }
-function PhoneGlyph(){return <span className="phone-glyph" aria-hidden="true">☎</span>}
+function PhoneGlyph(){return <span className="phone-glyph" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="6" width="13" height="12" rx="3"/><path d="m16 10 5-3v10l-5-3z"/></svg></span>}
