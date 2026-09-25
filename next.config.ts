@@ -8,10 +8,10 @@ const csp=[
  "object-src 'none'",
  "script-src 'self' 'unsafe-inline' https://www.googletagmanager.com https://www.googleadservices.com",
  "style-src 'self' 'unsafe-inline'",
- "img-src 'self' data: blob: https://www.google.com https://www.google.de https://*.googleusercontent.com",
+ "img-src 'self' data: blob: https://www.google.com https://www.google.de https://*.googleusercontent.com https://*.supabase.co",
  "font-src 'self' data:",
- "media-src 'self' blob:",
- "connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com https://www.googleadservices.com",
+ "media-src 'self' blob: https://*.supabase.co",
+ "connect-src 'self' https://www.google-analytics.com https://www.googletagmanager.com https://www.googleadservices.com https://*.supabase.co wss://*.supabase.co",
  "frame-src 'none'",
  "upgrade-insecure-requests"
 ].join("; ");
