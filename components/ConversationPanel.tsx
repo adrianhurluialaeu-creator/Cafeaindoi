@@ -3,33 +3,13 @@ import Image from "next/image";
 import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
 import type { Conversation } from "../lib/conversation";
 import {trackAnalytics} from "../lib/analytics-client";
-
-type MeteredFrameInstance = {
-  init: (
-    options: Record<string, unknown>,
-    element: HTMLElement,
-  ) => Promise<void> | void;
-  leave?: () => void;
-  on?: (event: string, listener: (data?: unknown) => void) => void;
-  off?: (event: string, listener: (data?: unknown) => void) => void;
-};
-declare global {
-  interface Window {
-    MeteredFrame?: new () => MeteredFrameInstance;
-  }
-}
+import AudioCall from "./AudioCall";
 type Props = {
   role: "adrian" | "ea";
   invitationId?: string;
   partnerName: string;
   onBack?: () => void;
   fullscreen?: boolean;
-};
-type Call = {
-  roomURL: string;
-  accessToken: string;
-  conversationId: string;
-  roomName: string;
 };
 type Kind = "sticker" | "question" | "declaration" | "challenge";
 const emojis = [
@@ -65,23 +45,6 @@ const questions = [
   "Ce loc ai vrea să descoperim împreună?",
   "Ce lucru mic te face să zâmbești imediat?",
 ];
-function mobileCallURL(call: Call) {
-  const url = new URL(
-    call.roomURL.startsWith("http") ? call.roomURL : `https://${call.roomURL}`,
-  );
-  url.searchParams.set("accessToken", call.accessToken);
-  url.searchParams.set("autoJoin", "true");
-  url.searchParams.set("joinVideoOn", "true");
-  url.searchParams.set("joinAudioOn", "true");
-  url.searchParams.set("showInviteBox", "false");
-  url.searchParams.set("disableChat", "true");
-  url.searchParams.set("disableScreenSharing", "true");
-  return url.toString();
-}
-function androidChromeURL(value: string) {
-  const url = new URL(value);
-  return `intent://${url.host}${url.pathname}${url.search}#Intent;scheme=https;package=com.android.chrome;S.browser_fallback_url=${encodeURIComponent(value)};end`;
-}
 
 export default function ConversationPanel({
   role,
@@ -98,7 +61,7 @@ export default function ConversationPanel({
     [text, setText] = useState(""),
     [error, setError] = useState(""),
     [busy, setBusy] = useState(false),
-    [call, setCall] = useState<Call | null>(null),
+    [callStartKey, setCallStartKey] = useState(0),
     [editMeeting, setEditMeeting] = useState(false),
     [now, setNow] = useState(Date.now()),
     [panel, setPanel] = useState<"plus" | "emoji" | "stickers" | null>(null),
@@ -193,40 +156,7 @@ export default function ConversationPanel({
       });
     if (data) setEditMeeting(false);
   }
-  async function join() {
-    const android = /Android/i.test(navigator.userAgent),
-      mobile =
-        android ||
-        /iPhone|iPad|iPod/i.test(navigator.userAgent) ||
-        window.matchMedia("(pointer: coarse)").matches;
-    const data = await request("PATCH", { action: "join" });
-    if (data?.call) {
-      if (
-        !invitationId ||
-        data.conversationId !== invitationId ||
-        data.call.conversationId !== invitationId ||
-        data.call.roomName !== data.conversation?.meeting?.roomName
-      ) {
-        setError(
-          "Apelul a fost blocat: ID-ul conversației nu coincide pe ambele dispozitive.",
-        );
-        return;
-      }
-      if (mobile) {
-        trackAnalytics("video_call_started",{role,invitationId:invitationId||data.call.conversationId});
-        const url = mobileCallURL(data.call);
-        window.location.assign(android ? androidChromeURL(url) : url);
-      } else {trackAnalytics("video_call_started",{role,invitationId:invitationId||data.call.conversationId});setCall(data.call)}
-    } else
-      window.setTimeout(
-        () =>
-          document
-            .querySelector<HTMLElement>(".conversation-card .formerror")
-            ?.scrollIntoView({ behavior: "smooth", block: "center" }),
-        0,
-      );
-  }
-  const closeCall = useCallback(() => setCall(null), []);
+  function join(){trackAnalytics("audio_call_started",{role,invitationId:invitationId||""});setCallStartKey(value=>value+1)}
   const meeting = conversation?.meeting,
     remaining = conversation?.expiresAt
       ? Math.max(0, Date.parse(conversation.expiresAt) - now)
@@ -243,7 +173,7 @@ export default function ConversationPanel({
   }
   return (
     <section
-      className={`conversation-card conversation-preview ${fullscreen ? "is-fullscreen" : ""} ${call ? "is-in-call" : ""}`}
+      className={`conversation-card conversation-preview ${fullscreen ? "is-fullscreen" : ""}`}
     >
       <header className="conversation-head">
         {onBack ? (
@@ -275,9 +205,9 @@ export default function ConversationPanel({
           onClick={
             meeting?.status === "acceptata" ? join : () => setEditMeeting(true)
           }
-          aria-label="Propune sau începe un apel video"
+          aria-label="Propune sau începe un apel audio"
         >
-          <VideoGlyph />
+          <PhoneGlyph />
         </button>
       </header>
       <p className="conversation-retention">
@@ -371,12 +301,12 @@ export default function ConversationPanel({
         <div className="coffee-call">
           <div className="coffee-call-title">
             <span>
-              <VideoGlyph />
+              <PhoneGlyph />
             </span>
             <div>
               <b>
                 {meeting.status === "propusa"
-                  ? "Întâlnire video propusă"
+                  ? "Apel audio propus"
                   : "O Cafea în Doi"}
               </b>
               <small>
@@ -416,7 +346,7 @@ export default function ConversationPanel({
           )}
           {meeting.status === "acceptata" && (
             <button className="coffee-start" onClick={join} disabled={busy}>
-              <VideoGlyph /> Începe o Cafea în Doi
+              <PhoneGlyph /> Sună
             </button>
           )}
           {meeting.status === "refuzata" && (
@@ -453,7 +383,7 @@ export default function ConversationPanel({
           onClick={join}
           disabled={busy}
         >
-          <VideoGlyph /> Începe o Cafea în Doi
+          <PhoneGlyph /> Sună
         </button>
       )}
       {panel && (
@@ -510,7 +440,7 @@ export default function ConversationPanel({
           ➤
         </button>
       </form>
-      {call && <VideoCall call={call} close={closeCall} />}
+      <AudioCall endpoint={endpoint} role={role} partnerName={partnerName} startKey={callStartKey}/>
     </section>
   );
 }
@@ -589,7 +519,7 @@ function ComposerPanel({
       {panel === "plus" && (
         <div className="plus-grid">
           <button onClick={openMeeting}>
-            📹<span>Cafea în Doi</span>
+            ☎<span>Apel audio</span>
           </button>
           <button onClick={openStickers}>
             💟<span>Sticker</span>
@@ -645,7 +575,7 @@ function MeetingForm({
   minimum.setMinutes(minimum.getMinutes() - minimum.getTimezoneOffset());
   return (
     <form className="coffee-propose" onSubmit={propose}>
-      <strong>Propune o întâlnire video</strong>
+      <strong>Propune un apel audio</strong>
       <label>
         Data și ora
         <input
@@ -679,119 +609,4 @@ function MeetingForm({
     </form>
   );
 }
-function VideoGlyph() {
-  return (
-    <span className="video-glyph" aria-hidden="true">
-      <i />
-    </span>
-  );
-}
-function VideoCall({ call, close }: { call: Call; close: () => void }) {
-  const host = useRef<HTMLDivElement>(null),
-    closeButton = useRef<HTMLButtonElement>(null),
-    [error, setError] = useState("");
-  useEffect(() => {
-    let frame: MeteredFrameInstance | undefined,
-      cancelled = false,
-      meetingEnded = false;
-    const meetingLeft = () => {
-      meetingEnded = true;
-      if (!cancelled) close();
-    };
-    const previous = document.body.style.overflow;
-    document.body.style.overflow = "hidden";
-    closeButton.current?.focus();
-    const escape = (event: KeyboardEvent) => {
-      if (event.key === "Escape") close();
-    };
-    document.addEventListener("keydown", escape);
-    async function start() {
-      try {
-        if (!window.MeteredFrame)
-          await new Promise<void>((resolve, reject) => {
-            const existing = document.querySelector<HTMLScriptElement>(
-              'script[data-metered="true"]',
-            );
-            if (existing) {
-              if (window.MeteredFrame) resolve();
-              else {
-                existing.addEventListener("load", () => resolve(), {
-                  once: true,
-                });
-                existing.addEventListener("error", () => reject(new Error()), {
-                  once: true,
-                });
-              }
-              return;
-            }
-            const script = document.createElement("script");
-            script.src =
-              "https://cdn.metered.ca/sdk/frame/1.4.3/sdk-frame.min.js";
-            script.dataset.metered = "true";
-            script.onload = () => resolve();
-            script.onerror = () => reject(new Error());
-            document.head.appendChild(script);
-          });
-        if (cancelled || !host.current || !window.MeteredFrame) return;
-        frame = new window.MeteredFrame();
-        await frame.init(
-          {
-            roomURL: call.roomURL,
-            accessToken: call.accessToken,
-            width: "100%",
-            height: "100%",
-            autoJoin: true,
-            joinVideoOn: true,
-            joinAudioOn: true,
-            showInviteBox: false,
-            disableChat: true,
-            disableScreenSharing: true,
-          },
-          host.current,
-        );
-        frame.on?.("meetingLeft", meetingLeft);
-      } catch {
-        if (!cancelled)
-          setError(
-            "Apelul video nu a putut fi încărcat. Verifică permisiunile camerei și microfonului, apoi încearcă din nou.",
-          );
-      }
-    }
-    void start();
-    return () => {
-      cancelled = true;
-      document.body.style.overflow = previous;
-      document.removeEventListener("keydown", escape);
-      frame?.off?.("meetingLeft", meetingLeft);
-      if (!meetingEnded) frame?.leave?.();
-    };
-  }, [call, close]);
-  return (
-    <div
-      className="video-overlay"
-      role="dialog"
-      aria-modal="true"
-      aria-label="Cafea în Doi"
-    >
-      <div className="video-dialog">
-        <header>
-          <div>
-            <b>☕ Cafea în Doi</b>
-            <small>Apelul nu se închide automat</small>
-          </div>
-          <button ref={closeButton} onClick={close} aria-label="Închide apelul">
-            ×
-          </button>
-        </header>
-        {error ? (
-          <div className="video-error" role="alert">
-            <p>{error}</p>
-            <button onClick={close}>Închide</button>
-          </div>
-        ) : (
-          <div ref={host} className="video-host" />
-        )}
-      </div>
-    </div>
-  );
-}
+function PhoneGlyph(){return <span className="phone-glyph" aria-hidden="true">☎</span>}

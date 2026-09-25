@@ -14,7 +14,7 @@ test("abonamentele partenerei sunt legate de sesiunea și invitația ei",async()
 test("notificările private sunt trimise numai partenerei conversației",async()=>{
  const route=await read("app/api/admin/conversatie/route.ts");
  assert.match(route,/recipient:"partner",invitationId:row\.id/);
- assert.match(route,/Adrian a început apelul video/);
+ assert.match(route,/Adrian te sună/);
  const push=await read("lib/push.ts");
  assert.match(push,/sub\.invitationId===target\.invitationId/);
 });

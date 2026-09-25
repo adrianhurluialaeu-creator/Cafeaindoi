@@ -49,7 +49,7 @@ async function load(since:string,until?:string){
  ]);
  const unique=(name:string)=>uniqueSessionIds(events,name).size,cohort=invitationCohort(events),cohortIds=new Set(cohort.keys());
  const visitors=new Set(sessions.map(item=>item.visitor_hash)).size,pageViews=events.filter(item=>item.event_name==="page_view").length;
- const submitted=unique("invitation_submitted"),activated=accounts.filter(item=>cohortIds.has(item.invitation_id)).length,conversationCount=conversations.filter(item=>cohortIds.has(item.id)).length,videoCalls=new Set(events.filter(item=>item.event_name==="video_call_started"&&typeof item.metadata?.invitationId==="string"&&cohortIds.has(item.metadata.invitationId as string)).map(item=>item.metadata.invitationId as string)).size;
+ const submitted=unique("invitation_submitted"),activated=accounts.filter(item=>cohortIds.has(item.invitation_id)).length,conversationCount=conversations.filter(item=>cohortIds.has(item.id)).length,videoCalls=new Set(events.filter(item=>(item.event_name==="audio_call_started"||item.event_name==="video_call_started")&&typeof item.metadata?.invitationId==="string"&&cohortIds.has(item.metadata.invitationId as string)).map(item=>item.metadata.invitationId as string)).size;
  return {sessions,events,invitations,accounts,conversations,messages,meetings,unique,summary:{visitors,sessions:sessions.length,pageViews,invitations:submitted,activated,conversations:conversationCount,messages:messages.length,videoCalls,conversion:sessions.length?Number((submitted/sessions.length*100).toFixed(1)):0}};
 }
 
@@ -76,7 +76,7 @@ export async function GET(req:NextRequest){
    {key:"submitted",label:"Invitație trimisă",value:current.summary.invitations},
    {key:"activated",label:"Cont activat",value:current.summary.activated},
    {key:"conversation",label:"Conversație creată",value:current.summary.conversations},
-   {key:"video",label:"Apel video început",value:current.summary.videoCalls}
+   {key:"audio",label:"Apel audio început",value:current.summary.videoCalls}
   ];
   const response={range:days||"all",analyticsAvailable:true,summary:current.summary,deltas:previous?{visitors:percentChange(current.summary.visitors,previous.summary.visitors),sessions:percentChange(current.summary.sessions,previous.summary.sessions),invitations:percentChange(current.summary.invitations,previous.summary.invitations),conversion:Number((current.summary.conversion-previous.summary.conversion).toFixed(1))}:null,trend:[...dayMap.values()],funnel,sources:[...sourceMap.values()].map(row=>({...row,campaigns:[...row.campaigns],conversion:row.sessions?Number((row.invitations/row.sessions*100).toFixed(1)):0})).sort((a,b)=>b.sessions-a.sessions).slice(0,12),pages:[...pages].map(([path,views])=>({path,views})).sort((a,b)=>b.views-a.views).slice(0,12),activity:{invitations:current.invitations.length,accounts:current.accounts.length,conversations:current.conversations.length,messages:current.messages.length,meetings:current.meetings.length,acceptedMeetings:current.meetings.filter(item=>item.status==="acceptata").length,videoCalls:current.meetings.filter(item=>item.room_name).length}};
   return NextResponse.json(response,{headers:{"Cache-Control":"private, no-store"}});

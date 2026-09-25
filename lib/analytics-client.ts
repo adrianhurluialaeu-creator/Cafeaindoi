@@ -13,7 +13,8 @@ export type AnalyticsEvent=
  |"invitation_step_completed"
  |"invitation_media_ready"
  |"invitation_submitted"
- |"video_call_started";
+ |"video_call_started"
+ |"audio_call_started";
 
 function uuid(){return crypto.randomUUID()}
 function identifier(storage:Storage,key:string){let value=storage.getItem(key);if(!value){value=uuid();storage.setItem(key,value)}return value}

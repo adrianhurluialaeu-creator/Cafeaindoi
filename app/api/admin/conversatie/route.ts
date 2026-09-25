@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { authorized } from "../invitatii/route";
 import {
-  attachMeetingRoom,
   proposeCoffeeMeeting,
   reactToConversationMessage,
   readConversation,
@@ -13,11 +12,7 @@ import {
   trustedConversationOrigin,
 } from "../../../../lib/conversation-security";
 import { readInvitation } from "../../../../lib/invitations";
-import {
-  createPrivateRoom,
-  createRoomAccess,
-  meetingRoomName,
-} from "../../../../lib/metered";
+import {answerAudioCall,endAudioCall,readAudioCall,startAudioCall} from "../../../../lib/audio-call";
 import {sendPush} from "../../../../lib/push";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
@@ -37,6 +32,7 @@ export async function GET(req: NextRequest) {
         {
           conversationId: row.id,
           conversation: await readConversation(row.id),
+          audioCall: await readAudioCall(row.id),
         },
         { headers: { "Cache-Control": "private, no-store" } },
       )
@@ -138,30 +134,9 @@ export async function PATCH(req: NextRequest) {
         conversation,
       });
     }
-    if (body.action === "join") {
-      let conversation = await readConversation(row.id);
-      if (!conversation?.meeting || conversation.meeting.status !== "acceptata")
-        throw new Error("Cafeaua în Doi nu este confirmată.");
-      let roomName = conversation.meeting.roomName,
-        attach = false;
-      if (!roomName) {
-        roomName = meetingRoomName(row.id, conversation.meeting.id);
-        attach = true;
-      }
-      await createPrivateRoom(roomName);
-      if (attach) conversation = await attachMeetingRoom(row.id, roomName);
-      console.info("[metered] JOIN", {
-        role: "adrian",
-        conversationId: row.id,
-        roomName,
-      });
-      try{await sendPush("Adrian a început apelul video","Intră în Povestea noastră pentru a răspunde.",{url:"/povestea-noastra",tag:`apel-${row.id}`,recipient:"partner",invitationId:row.id})}catch(pushError){console.error("[push] PARTNER_VIDEO_ERROR",pushError)}
-      return NextResponse.json({
-        conversationId: row.id,
-        conversation,
-        call: await createRoomAccess(row.id, roomName, "Adrian", true),
-      });
-    }
+    if(body.action==="audio_offer"){const audioCall=await startAudioCall(row.id,"adrian",body.offer);try{await sendPush("Adrian te sună","Deschide Povestea noastră pentru a răspunde.",{url:"/povestea-noastra",tag:`apel-audio-${row.id}`,recipient:"partner",invitationId:row.id})}catch(pushError){console.error("[push] PARTNER_AUDIO_ERROR",pushError)}return NextResponse.json({conversationId:row.id,audioCall})}
+    if(body.action==="audio_answer")return NextResponse.json({conversationId:row.id,audioCall:await answerAudioCall(row.id,"adrian",String(body.callId||""),body.answer)});
+    if(body.action==="audio_end")return NextResponse.json({conversationId:row.id,audioCall:await endAudioCall(row.id,String(body.callId||""))});
     return NextResponse.json({ error: "Acțiune invalidă." }, { status: 400 });
   } catch (error) {
     return NextResponse.json(

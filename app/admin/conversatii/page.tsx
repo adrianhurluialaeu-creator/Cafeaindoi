@@ -31,7 +31,7 @@ export default async function Page({
     return (
       <AdminShell
         title="Conversații"
-        subtitle="Mesagerie privată și întâlniri video Cafea în Doi."
+        subtitle="Mesagerie privată și apeluri audio Cafea în Doi."
       >
         <p className="formerror" role="alert">
           Conversațiile nu au putut fi încărcate. Reîncarcă pagina peste câteva
@@ -68,7 +68,7 @@ export default async function Page({
   return (
     <AdminShell
       title="Conversații"
-      subtitle="Mesagerie privată și întâlniri video Cafea în Doi."
+      subtitle="Mesagerie privată și apeluri audio Cafea în Doi."
     >
       <AdminConversationHub items={items} selectedId={selectedId} />
     </AdminShell>

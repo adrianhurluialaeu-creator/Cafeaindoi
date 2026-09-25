@@ -4,7 +4,7 @@ import {createSupabaseAdmin} from "../../../lib/supabase";
 import {consumeRateLimit,requestIp} from "../../../lib/rate-limit";
 
 export const runtime="nodejs";
-const events=new Set(["page_view","compatibility_started","compatibility_step_completed","compatibility_completed","invitation_started","invitation_step_completed","invitation_media_ready","invitation_submitted","video_call_started"]);
+const events=new Set(["page_view","compatibility_started","compatibility_step_completed","compatibility_completed","invitation_started","invitation_step_completed","invitation_media_ready","invitation_submitted","video_call_started","audio_call_started"]);
 const uuid=/^[0-9a-f]{8}-[0-9a-f]{4}-4[0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const clean=(value:unknown,max=160)=>typeof value==="string"?value.trim().slice(0,max)||null:null;
 const safePath=(value:unknown)=>{const path=clean(value,300)||"/";return path.startsWith("/")?path:"/"};

@@ -1,7 +1,6 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import {
-  attachMeetingRoom,
   proposeCoffeeMeeting,
   reactToConversationMessage,
   readConversation,
@@ -13,11 +12,7 @@ import {
   trustedConversationOrigin,
 } from "../../../../lib/conversation-security";
 import { readInvitation } from "../../../../lib/invitations";
-import {
-  createPrivateRoom,
-  createRoomAccess,
-  meetingRoomName,
-} from "../../../../lib/metered";
+import {answerAudioCall,endAudioCall,readAudioCall,startAudioCall} from "../../../../lib/audio-call";
 import {
   PORTAL_COOKIE,
   verifyPortalSession,
@@ -49,6 +44,7 @@ export async function GET(req: Request) {
         {
           conversationId: user.id,
           conversation: await readConversation(user.id),
+          audioCall: await readAudioCall(user.id),
         },
         { headers: { "Cache-Control": "private, no-store" } },
       )
@@ -140,34 +136,9 @@ export async function PATCH(req: Request) {
         conversation,
       });
     }
-    if (body.action === "join") {
-      let conversation = await readConversation(user.id);
-      if (!conversation?.meeting || conversation.meeting.status !== "acceptata")
-        throw new Error("Cafeaua în Doi nu este confirmată.");
-      let roomName = conversation.meeting.roomName,
-        attach = false;
-      if (!roomName) {
-        roomName = meetingRoomName(user.id, conversation.meeting.id);
-        attach = true;
-      }
-      await createPrivateRoom(roomName);
-      if (attach) conversation = await attachMeetingRoom(user.id, roomName);
-      console.info("[metered] JOIN", {
-        role: "partner",
-        conversationId: user.id,
-        roomName,
-      });
-      return NextResponse.json({
-        conversationId: user.id,
-        conversation,
-        call: await createRoomAccess(
-          user.id,
-          roomName,
-          user.invitation.prenume,
-          false,
-        ),
-      });
-    }
+    if(body.action==="audio_offer"){const audioCall=await startAudioCall(user.id,"ea",body.offer);try{await sendPush(`${user.invitation.prenume} te sună`,`Deschide conversația pentru a răspunde.`,{url:`/admin/conversatii?id=${encodeURIComponent(user.id)}`,tag:`apel-audio-${user.id}`})}catch(pushError){console.error("[push] AUDIO_ERROR",pushError)}return NextResponse.json({conversationId:user.id,audioCall})}
+    if(body.action==="audio_answer")return NextResponse.json({conversationId:user.id,audioCall:await answerAudioCall(user.id,"ea",String(body.callId||""),body.answer)});
+    if(body.action==="audio_end")return NextResponse.json({conversationId:user.id,audioCall:await endAudioCall(user.id,String(body.callId||""))});
     return NextResponse.json({ error: "Acțiune invalidă." }, { status: 400 });
   } catch (error) {
     return NextResponse.json(
