@@ -18,6 +18,7 @@ import {
   verifyPortalSession,
 } from "../../../../lib/portal-auth";
 import {sendPush} from "../../../../lib/push";
+import {createTurnIceServers} from "../../../../lib/turn";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 async function current() {
@@ -102,6 +103,7 @@ export async function PATCH(req: Request) {
         { error: "ID-ul conversației nu coincide." },
         { status: 409 },
       );
+    if(body.action==="turn_credentials")return NextResponse.json(await createTurnIceServers(),{headers:{"Cache-Control":"private, no-store"}});
     if (body.action === "react")
       return NextResponse.json({
         conversationId: user.id,
