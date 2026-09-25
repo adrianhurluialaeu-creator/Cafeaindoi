@@ -14,6 +14,7 @@ import {
 import { readInvitation } from "../../../../lib/invitations";
 import {answerAudioCall,endAudioCall,readAudioCall,startAudioCall} from "../../../../lib/audio-call";
 import {sendPush} from "../../../../lib/push";
+import {createTurnIceServers} from "../../../../lib/turn";
 export const runtime = "nodejs";
 export const dynamic = "force-dynamic";
 const valid = (id: string | null) => !!id && /^[0-9a-f-]{36}$/i.test(id);
@@ -100,6 +101,7 @@ export async function PATCH(req: NextRequest) {
         { error: "ID-ul conversației nu coincide." },
         { status: 409 },
       );
+    if(body.action==="turn_credentials")return NextResponse.json(await createTurnIceServers(),{headers:{"Cache-Control":"private, no-store"}});
     if (body.action === "react")
       return NextResponse.json({
         conversationId: row.id,
