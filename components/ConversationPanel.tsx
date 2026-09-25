@@ -62,6 +62,7 @@ export default function ConversationPanel({
     [error, setError] = useState(""),
     [busy, setBusy] = useState(false),
     [callStartKey, setCallStartKey] = useState(0),
+    [callEndKey, setCallEndKey] = useState(0),
     [editMeeting, setEditMeeting] = useState(false),
     [now, setNow] = useState(Date.now()),
     [panel, setPanel] = useState<"plus" | "emoji" | "stickers" | null>(null),
@@ -405,16 +406,7 @@ export default function ConversationPanel({
         />
       )}
       <form className="conversation-compose" onSubmit={send}>
-        {callActive ? <button type="button" className="compose-plus compose-hide-chat" aria-label="Ascunde mesajele" onClick={()=>setChatOpen(false)}>◉</button> : <button type="button" className="compose-plus" aria-label="Mai multe opțiuni" aria-expanded={panel === "plus"} onClick={() => setPanel(panel === "plus" ? null : "plus")}>+</button>}
-        <button
-          type="button"
-          className="compose-emoji"
-          aria-label="Alege un emoji"
-          aria-expanded={panel === "emoji"}
-          onClick={() => setPanel(panel === "emoji" ? null : "emoji")}
-        >
-          😊
-        </button>
+        {callActive ? <button type="button" className="compose-end-call" aria-label="Închide apelul" onClick={()=>setCallEndKey(value=>value+1)}><EndCallGlyph /></button> : <button type="button" className="compose-plus" aria-label="Mai multe opțiuni" aria-expanded={panel === "plus"} onClick={() => setPanel(panel === "plus" ? null : "plus")}>+</button>}
         <label className="sr-only" htmlFor={`message-${role}`}>
           Mesaj
         </label>
@@ -426,6 +418,16 @@ export default function ConversationPanel({
           placeholder="Scrie un mesaj…"
           required
         />
+        {callActive ? <button type="button" className="compose-plus" aria-label="Mai multe opțiuni" aria-expanded={panel === "plus"} onClick={() => setPanel(panel === "plus" ? null : "plus")}>+</button> : null}
+        <button
+          type="button"
+          className="compose-emoji"
+          aria-label="Alege un emoji"
+          aria-expanded={panel === "emoji"}
+          onClick={() => setPanel(panel === "emoji" ? null : "emoji")}
+        >
+          😊
+        </button>
         <button
           className="compose-send"
           disabled={busy || !text.trim()}
@@ -434,7 +436,7 @@ export default function ConversationPanel({
           ➤
         </button>
       </form>
-      <AudioCall endpoint={endpoint} role={role} partnerName={partnerName} startKey={callStartKey} chatOpen={chatOpen} onToggleChat={()=>setChatOpen(value=>!value)} onActiveChange={setCallActive}/>
+      <AudioCall endpoint={endpoint} role={role} partnerName={partnerName} startKey={callStartKey} endKey={callEndKey} chatOpen={chatOpen} onToggleChat={()=>setChatOpen(value=>!value)} onActiveChange={setCallActive}/>
     </section>
   );
 }
@@ -604,3 +606,4 @@ function MeetingForm({
   );
 }
 function PhoneGlyph(){return <span className="phone-glyph" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><rect x="3" y="6" width="13" height="12" rx="3"/><path d="m16 10 5-3v10l-5-3z"/></svg></span>}
+function EndCallGlyph(){return <svg className="end-call-glyph" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M5.2 15.4c4.2-3.1 9.4-3.1 13.6 0"/><path d="m7.5 13.9-1.8-2.5-3 2.2 2.2 3.1c.4.6 1.2.7 1.8.3l1.4-1"/><path d="m16.5 13.9 1.8-2.5 3 2.2-2.2 3.1c-.4.6-1.2.7-1.8.3l-1.4-1"/></svg>}
