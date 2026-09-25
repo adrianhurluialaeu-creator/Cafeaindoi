@@ -65,7 +65,9 @@ export default function ConversationPanel({
     [editMeeting, setEditMeeting] = useState(false),
     [now, setNow] = useState(Date.now()),
     [panel, setPanel] = useState<"plus" | "emoji" | "stickers" | null>(null),
-    [selectedMessage, setSelectedMessage] = useState<string | null>(null);
+    [selectedMessage, setSelectedMessage] = useState<string | null>(null),
+    [callActive, setCallActive] = useState(false),
+    [chatOpen, setChatOpen] = useState(true);
   const messagesEnd = useRef<HTMLDivElement>(null);
   const load = useCallback(async () => {
     try {
@@ -173,7 +175,7 @@ export default function ConversationPanel({
   }
   return (
     <section
-      className={`conversation-card conversation-preview ${fullscreen ? "is-fullscreen" : ""}`}
+      className={`conversation-card conversation-preview ${fullscreen ? "is-fullscreen" : ""} ${callActive ? "is-in-call" : ""} ${callActive&&!chatOpen ? "is-chat-hidden" : ""}`}
     >
       <header className="conversation-head">
         {onBack ? (
@@ -196,7 +198,7 @@ export default function ConversationPanel({
             unoptimized
           />
           <div>
-            <h2>Conversația noastră</h2>
+            <h2>{callActive ? "Chat" : "Conversația noastră"}</h2>
             <span>🔒 Doar voi doi · {partnerName}</span>
           </div>
         </div>
@@ -440,7 +442,7 @@ export default function ConversationPanel({
           ➤
         </button>
       </form>
-      <AudioCall endpoint={endpoint} role={role} partnerName={partnerName} startKey={callStartKey}/>
+      <AudioCall endpoint={endpoint} role={role} partnerName={partnerName} startKey={callStartKey} chatOpen={chatOpen} onToggleChat={()=>setChatOpen(value=>!value)} onActiveChange={setCallActive}/>
     </section>
   );
 }
