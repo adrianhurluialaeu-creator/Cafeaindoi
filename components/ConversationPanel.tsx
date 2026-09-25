@@ -405,15 +405,7 @@ export default function ConversationPanel({
         />
       )}
       <form className="conversation-compose" onSubmit={send}>
-        <button
-          type="button"
-          className="compose-plus"
-          aria-label="Mai multe opțiuni"
-          aria-expanded={panel === "plus"}
-          onClick={() => setPanel(panel === "plus" ? null : "plus")}
-        >
-          +
-        </button>
+        {callActive ? <button type="button" className="compose-plus compose-hide-chat" aria-label="Ascunde mesajele" onClick={()=>setChatOpen(false)}>◉</button> : <button type="button" className="compose-plus" aria-label="Mai multe opțiuni" aria-expanded={panel === "plus"} onClick={() => setPanel(panel === "plus" ? null : "plus")}>+</button>}
         <button
           type="button"
           className="compose-emoji"
