@@ -1,6 +1,6 @@
 "use client";
 import Image from "next/image";
-import { FormEvent, useCallback, useEffect, useRef, useState } from "react";
+import { FormEvent, KeyboardEvent as ReactKeyboardEvent, useCallback, useEffect, useRef, useState } from "react";
 import type { Conversation } from "../lib/conversation";
 import {trackAnalytics} from "../lib/analytics-client";
 import AudioCall from "./AudioCall";
@@ -141,9 +141,16 @@ export default function ConversationPanel({
   }
   async function send(e: FormEvent) {
     e.preventDefault();
+    const message = text;
+    if (busy || !message.trim()) return;
+    const sent = await request("POST", { text: message });
+    if (sent) setText((current) => current === message ? "" : current);
+  }
+  function handleMessageKeyDown(event: ReactKeyboardEvent<HTMLTextAreaElement>) {
+    if (event.key !== "Enter" || event.shiftKey || event.nativeEvent.isComposing) return;
     if (!text.trim()) return;
-    const sent = await request("POST", { text });
-    if (sent) setText("");
+    event.preventDefault();
+    if (!busy) event.currentTarget.form?.requestSubmit();
   }
   async function sendSpecial(value: string, kind: Kind) {
     const sent = await request("POST", { text: value, kind });
@@ -416,6 +423,7 @@ export default function ConversationPanel({
           onChange={(e) => setText(e.target.value)}
           maxLength={2000}
           placeholder="Scrie un mesaj…"
+          onKeyDown={handleMessageKeyDown}
           required
         />
         {callActive ? <button type="button" className="compose-plus" aria-label="Mai multe opțiuni" aria-expanded={panel === "plus"} onClick={() => setPanel(panel === "plus" ? null : "plus")}>+</button> : null}
@@ -431,11 +439,13 @@ export default function ConversationPanel({
         <button
           className="compose-send"
           disabled={busy || !text.trim()}
-          aria-label="Trimite mesajul"
+          aria-label={busy ? "Se trimite mesajul" : "Trimite mesajul"}
+          aria-busy={busy}
         >
-          ➤
+          {busy ? "…" : "➤"}
         </button>
       </form>
+      {callActive && error ? <p className="composer-error" role="alert">{error}</p> : null}
       <AudioCall endpoint={endpoint} role={role} partnerName={partnerName} startKey={callStartKey} endKey={callEndKey} chatOpen={chatOpen} onToggleChat={()=>setChatOpen(value=>!value)} onActiveChange={setCallActive}/>
     </section>
   );

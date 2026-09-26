@@ -481,3 +481,14 @@ button.admin-stat{cursor:pointer}.admin-stat.active{border-color:#9d765d;box-sha
 .conversation-preview.is-in-call .audio-call-meta{top:112px}
 @media(max-width:800px){.conversation-preview.is-in-call .conversation-compose{grid-template-columns:40px minmax(0,1fr) 40px 40px 40px!important;gap:5px!important}.conversation-preview.is-in-call .compose-end-call{width:40px!important;height:40px!important;min-width:40px!important;min-height:40px!important}.conversation-preview.is-in-call .audio-call-actions:not(.incoming){left:10px;top:52px}.conversation-preview.is-in-call .audio-call-actions:not(.incoming) button{width:42px;height:42px;min-width:42px;min-height:42px}.conversation-preview.is-in-call .audio-call-meta{top:104px}}
 .css-revision-4{--deployment-style-revision:4}
+/* Chat composer improvements: keep tools available during live video. */
+.conversation-preview.is-in-call>.composer-panel{display:block!important;position:absolute;z-index:8;left:20px;bottom:76px;width:min(470px,38vw);max-height:min(58dvh,480px);overflow:auto;margin:0;border-color:#ffffff30;border-radius:20px;background:#211714ed;color:#fff;box-shadow:0 12px 34px #0007;backdrop-filter:blur(16px)}
+.conversation-preview.is-in-call>.composer-panel>header button{color:#fff}
+.conversation-preview.is-in-call>.composer-panel .plus-grid button,.conversation-preview.is-in-call>.composer-panel .sticker-grid button{background:#fffaf6;color:#641128;border-color:#ffffff40}
+.conversation-preview.is-in-call.is-chat-hidden>.composer-panel{display:none!important}
+.conversation-preview.is-in-call>.composer-error{position:absolute;z-index:9;left:20px;bottom:70px;width:min(470px,38vw);margin:0;padding:8px 12px;border:1px solid #ffb1b9;border-radius:12px;background:#5d1021ed;color:#fff;font-size:13px;box-shadow:0 6px 18px #0005}
+.conversation-preview.is-in-call.is-chat-hidden>.composer-error{display:none!important}
+.conversation-preview .compose-send[aria-busy="true"]{font-size:22px;animation:compose-pending 1s linear infinite}
+@keyframes compose-pending{to{transform:rotate(360deg)}}
+@media(max-width:800px){.conversation-preview.is-in-call>.composer-panel{left:10px;bottom:60px;width:min(470px,calc(100% - 20px));max-height:54dvh}.conversation-preview.is-in-call>.composer-error{left:10px;bottom:58px;width:calc(100% - 20px)}}
+.css-revision-5{--deployment-style-revision:5}
